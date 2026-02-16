@@ -2,8 +2,6 @@
 
 **Descrição**: O usuário quer poder mandar pontos para um amigo. O sistema deve ter uma tela para isso, uma API que processa e funcionar no App. Tem que ser rápido e seguro.
 
-
-
 ## 📄 Contexto do Projeto: Sistema de Transferência "QualiPoints"
 
 ### 1. Visão Geral do Requisito
