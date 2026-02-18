@@ -188,6 +188,140 @@ A heurística Chique é fundamental para o design escalável porque a excelênci
 - Menus intuitivos reduzem tempo de navegação
 - Feedback claro reduz tentativas e erros
 
+## Implementando Testes de UI com Chique
+
+Para validar os aspectos de elegância e polimento (Chique), consulte [TEST_STRATEGY.md](../../utils/testes/TEST_STRATEGY.md) com seu requisito/UI para gerar relatório; use o relatório com [TEST_COMPONENT_GUIDE.md](../../utils/testes/TEST_COMPONENT_GUIDE.md) e [TEST_E2E_GUIDE.md](../../utils/testes/TEST_E2E_GUIDE.md) para implementação. Orientações:
+
+### Testes Recomendados por Aspecto
+
+**Campos Obrigatórios:**
+- **Componentes**: Verificar asteriscos, atributos aria-required, validação visual
+- **E2E**: Tentar submeter sem preencher, verificar mensagens de erro específicas
+
+**Habilitar/Desabilitar:**
+- **Componentes**: Testar lógica de estado (habilitado/desabilitado) com diferentes inputs
+- **E2E**: Verificar que botões se tornam habilitados quando condições são atendidas
+
+**Interrupção da Ação:**
+- **Componentes**: Testar exibição de modais, toasts, mensagens inline
+- **E2E**: Verificar que interrupções preservam contexto e permitem recuperação
+
+**Quebra de Fluxos:**
+- **E2E**: Testar navegação, links externos, expiração de sessão, auto-save
+
+**Usabilidade dos Menus:**
+- **Componentes**: Testar navegação, estados ativos, responsividade
+- **E2E**: Verificar estrutura, breadcrumbs, navegação completa
+
+**Estouro de Campos:**
+- **Componentes**: Testar limites de caracteres, contadores, validação de tamanho
+- **E2E**: Verificar que limites são respeitados e comunicados
+
+### Exemplo de Cobertura Chique em Testes
+
+Para um formulário de transferência:
+
+**Campos Obrigatórios:**
+```typescript
+// React Testing Library
+it('deve indicar campos obrigatórios visualmente', () => {
+  render(<TransferForm />);
+  
+  // Verificar asteriscos
+  expect(screen.getByText(/Destinatário \*/)).toBeInTheDocument();
+  expect(screen.getByText(/Valor \*/)).toBeInTheDocument();
+  
+  // Verificar atributos ARIA
+  expect(screen.getByLabelText(/Destinatário/)).toHaveAttribute('aria-required', 'true');
+  expect(screen.getByLabelText(/Valor/)).toHaveAttribute('aria-required', 'true');
+});
+
+it('deve exibir erro específico para campo obrigatório não preenchido', async () => {
+  const user = userEvent.setup();
+  render(<TransferForm />);
+  
+  // Tentar submeter sem preencher
+  await user.click(screen.getByRole('button', { name: /Transferir/ }));
+  
+  // Verificar mensagens específicas
+  expect(screen.getByText(/Destinatário é obrigatório/)).toBeInTheDocument();
+  expect(screen.getByText(/Valor é obrigatório/)).toBeInTheDocument();
+});
+```
+
+**Habilitar/Desabilitar:**
+```typescript
+it('botão deve estar desabilitado quando campos vazios', () => {
+  render(<TransferForm />);
+  
+  const button = screen.getByRole('button', { name: /Transferir/ });
+  expect(button).toBeDisabled();
+});
+
+it('botão deve ser habilitado quando campos preenchidos', async () => {
+  const user = userEvent.setup();
+  render(<TransferForm />);
+  
+  await user.type(screen.getByLabelText(/Destinatário/), 'user123');
+  await user.type(screen.getByLabelText(/Valor/), '500');
+  
+  const button = screen.getByRole('button', { name: /Transferir/ });
+  expect(button).toBeEnabled();
+});
+```
+
+**Estouro de Campos:**
+```typescript
+it('deve limitar amount a 1.000.000 e exibir mensagem', async () => {
+  const user = userEvent.setup();
+  render(<TransferForm />);
+  
+  const amountInput = screen.getByLabelText(/Valor/);
+  await user.type(amountInput, '2000000'); // Acima do limite
+  
+  // Verificar validação
+  expect(screen.getByText(/não pode exceder 1.000.000/)).toBeInTheDocument();
+});
+
+it('deve exibir contador de caracteres em campo com limite', () => {
+  render(<DescriptionField maxLength={500} />);
+  
+  expect(screen.getByText(/0 \/ 500/)).toBeInTheDocument();
+});
+```
+
+**Java (Selenium):**
+
+```java
+@Test
+@DisplayName("Botão deve estar desabilitado quando campos vazios")
+void buttonShouldBeDisabledWhenFieldsEmpty() {
+    driver.get(BASE_URL + "/transfer");
+    
+    WebElement button = driver.findElement(By.cssSelector("button[type='submit']"));
+    assertFalse(button.isEnabled());
+}
+
+@Test
+@DisplayName("Deve exibir erro para campos obrigatórios não preenchidos")
+void shouldShowErrorForRequiredFields() {
+    driver.get(BASE_URL + "/transfer");
+    
+    // Tentar submeter sem preencher
+    driver.findElement(By.cssSelector("button[type='submit']")).click();
+    
+    // Verificar mensagens de erro
+    WebElement recipientError = wait.until(
+        ExpectedConditions.presenceOfElementLocated(
+            By.xpath("//label[contains(text(), 'Destinatário')]/following-sibling::span")
+        )
+    );
+    assertTrue(recipientError.getText().contains("obrigatório"));
+}
+```
+
+Os guides [TEST_COMPONENT_GUIDE.md](../../utils/testes/TEST_COMPONENT_GUIDE.md) e [TEST_E2E_GUIDE.md](../../utils/testes/TEST_E2E_GUIDE.md) fornecem exemplos em TypeScript e Java.
+
 ## Checklist de Análise Chique
 
 Ao aplicar a heurística, verifique:

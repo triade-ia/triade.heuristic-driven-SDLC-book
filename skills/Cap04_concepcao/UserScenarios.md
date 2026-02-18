@@ -29,14 +29,13 @@ O que acontece se o comportamento humano desviar do esperado?
 
 ## Critérios de Saída
 
-### Cenário 1: O Usuário Padrão
-Foco em clareza e fluxo principal.
+O relatório deve conter:
 
-### Cenário 2: O Usuário sob Pressão/Estresse
-Foco em performance e resiliência mobile/web.
-
-### Cenário 3: O Usuário Mal Intencionado ou Confuso
-Foco em segurança e tratamento de erro.
+1. **Cenário 1: O Usuário Padrão** - Foco em clareza e fluxo principal, incluindo persona, motivação, ambiente e fluxo de valor
+2. **Cenário 2: O Usuário sob Pressão/Estresse** - Foco em performance e resiliência mobile/web, explorando contextos adversos
+3. **Cenário 3: O Usuário Mal Intencionado ou Confuso** - Foco em segurança e tratamento de erro, identificando possíveis abusos ou mal uso
+4. **Lacunas de Decisão** - Lista de ao menos 3 gaps que o requisito original não cobria (ex: falta de feedback, timeout, estados de erro)
+5. **Edge Cases de Negócio** - Identificação de desvios do comportamento esperado para cada cenário
 
 ## Objetivo Final
 

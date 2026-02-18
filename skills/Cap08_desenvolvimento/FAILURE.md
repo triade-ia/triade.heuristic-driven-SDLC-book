@@ -194,6 +194,90 @@ Ao elaborar casos de teste com FAILURE:
 - Para cada funcionalidade crítica, tenha pelo menos um cenário de falha por dimensão relevante, com resultado esperado claro (mensagem, código, estado da UI, conteúdo de log).
 - Inclua testes de resiliência (falha de dependência, timeout, rede instável) quando aplicável.
 
+#### Implementação de Testes FAILURE por Camada
+
+Para decidir QUAIS testes de falha implementar:
+
+1. **Consulte [TEST_STRATEGY.md](../../utils/testes/TEST_STRATEGY.md)** com seu requisito e/ou código. A skill identifica aplicação de FAILURE e gera relatório em `output/test-strategy-*.md`.
+2. **Para implementar**, use o relatório com os guides: [TEST_UNIT_GUIDE.md](../../utils/testes/TEST_UNIT_GUIDE.md), [TEST_INTEGRATION_GUIDE.md](../../utils/testes/TEST_INTEGRATION_GUIDE.md), [TEST_SERVICE_GUIDE.md](../../utils/testes/TEST_SERVICE_GUIDE.md), [TEST_E2E_GUIDE.md](../../utils/testes/TEST_E2E_GUIDE.md).
+
+## Implementando Testes de Cenários de Falha
+
+A heurística FAILURE fornece um framework completo para testar como o sistema se comporta quando algo dá errado. Para implementar testes que cobrem as sete dimensões:
+
+1. **Identifique fluxos críticos** que precisam de testes de falha
+2. **Para cada fluxo, simule falhas** e teste nas camadas apropriadas:
+   - Unitários: exceções, erros de validação, estados inválidos
+   - Integração: falhas de banco, timeouts, transações
+   - Serviço: erros HTTP, indisponibilidade, payloads inválidos
+   - E2E: erros na UI, recuperação do usuário, mensagens
+
+3. Use o relatório com [TEST_INTEGRATION_GUIDE.md](../../utils/testes/TEST_INTEGRATION_GUIDE.md) e [TEST_SERVICE_GUIDE.md](../../utils/testes/TEST_SERVICE_GUIDE.md) para rollback e códigos HTTP; [TEST_E2E_GUIDE.md](../../utils/testes/TEST_E2E_GUIDE.md) para recuperação na UI.
+
+### Exemplo de Cobertura FAILURE em Testes
+
+Para um fluxo de transferência de QualiPoints, os testes de falha devem cobrir:
+
+**Functional:**
+- Rollback quando crédito falha → saldo inalterado
+- Erro 402/404/422 → nenhuma alteração em saldos
+- Banco indisponível → 503 sem processar
+
+**Appropriate:**
+- Saldo insuficiente → 402 com mensagem clara
+- Destinatário não existe → 404 com mensagem clara
+- Valor inválido → 422 com detalhes do erro
+
+**Impact:**
+- Nenhum débito em cenários de erro
+- Idempotência previne duplicatas
+- Estado preservado na UI após erro
+
+**Log:**
+- Falhas registradas com contexto (request_id, user_id)
+- Logs não expõem tokens ou dados sensíveis
+- Nível apropriado (WARN para 4xx, ERROR para 5xx)
+
+**UI:**
+- Loading visível durante processamento
+- Mensagem de erro exibida claramente
+- UI não trava após erro
+- Botão reabilitado para retry
+
+**Recovery:**
+- Idempotency-key permite retry seguro
+- Campos preservados após erro 422
+- Opção "Tentar novamente" após 500/503
+
+**Emotions:**
+- Mensagens não culpabilizam usuário
+- Tom de "problema temporário" em 500/503
+- Usuário informado e com opções claras
+
+### Técnicas de Simulação de Falhas
+
+**Em testes unitários:**
+- Lançar exceções em mocks
+- Retornar valores que causam erro
+- Simular timeouts
+
+**Em testes de integração:**
+- Usar test containers com falhas injetadas
+- Simular constraints violadas
+- Provocar deadlocks controlados
+
+**Em testes de serviço:**
+- Mockar dependências externas para retornar erro
+- Simular indisponibilidade de serviço
+- Testar circuit breakers e fallbacks
+
+**Em testes E2E:**
+- Mockar APIs backend para retornar erros
+- Simular rede lenta ou instável
+- Testar recuperação após timeout
+
+Consulte TEST_STRATEGY e os guides em [utils/testes/](../../utils/testes/) para exemplos em TypeScript e Java.
+
 ## Análise de Impacto em Escala
 
 - **Confiabilidade em sistemas distribuídos**: Functional e Recovery bem aplicados garantem que falhas pontuais não derrubem o sistema inteiro; isolamento e fallbacks são essenciais em escala.

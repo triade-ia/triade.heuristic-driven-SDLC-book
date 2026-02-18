@@ -164,6 +164,99 @@ Ao elaborar casos de teste com VADER:
 - Para cada dimensão, tenha pelo menos um caso válido, um inválido e um de limite com resposta esperada clara.
 - Inclua testes de carga para validar rate limiting e consumo de recursos quando relevante.
 
+#### Implementação de Testes VADER por Camada
+
+Para decidir QUAIS testes implementar aplicando VADER:
+
+1. **Consulte [TEST_STRATEGY.md](../../utils/testes/TEST_STRATEGY.md)** com seu requisito e/ou código. A skill analisa, identifica aplicação de VADER e gera relatório em `output/test-strategy-*.md`.
+2. **Para implementar**, use o relatório com os guides: [TEST_UNIT_GUIDE.md](../../utils/testes/TEST_UNIT_GUIDE.md), [TEST_INTEGRATION_GUIDE.md](../../utils/testes/TEST_INTEGRATION_GUIDE.md), [TEST_SERVICE_GUIDE.md](../../utils/testes/TEST_SERVICE_GUIDE.md), [TEST_E2E_GUIDE.md](../../utils/testes/TEST_E2E_GUIDE.md).
+
+## Implementando Testes Baseados em VADER
+
+A heurística VADER é essencial para validar APIs de forma completa. Para implementar testes que cobrem as cinco dimensões:
+
+1. **Identifique os endpoints** da API
+2. **Para cada endpoint, crie testes nas camadas apropriadas:**
+   - Unitários: validações de input, funções de autorização, transformações
+   - Integração: transações, consistência de dados com banco real
+   - Serviço: APIs HTTP completas com autenticação, validação e error handling
+   - E2E: fluxos completos através da UI com validação de autorização
+
+3. Use o relatório gerado por TEST_STRATEGY como contexto com [TEST_SERVICE_GUIDE.md](../../utils/testes/TEST_SERVICE_GUIDE.md) para testes de API em TypeScript (Supertest) e Java (RestAssured).
+
+### Exemplo de Cobertura VADER em Testes de API
+
+Para um endpoint POST /api/v1/transactions, os testes devem cobrir:
+
+**Values (Validação de Inputs):**
+- Body sem campos obrigatórios → 400
+- amount = 0 → 422
+- amount negativo → 422
+- recipient_id vazio → 422
+- Tipos incorretos (string para number) → 400/422
+
+**Authorization:**
+- Sem token → 401
+- Token inválido → 401
+- Token expirado → 401
+- Usuário sem permissão → 403
+- Com autorização correta → sucesso
+
+**Data Consistency:**
+- Idempotência com idempotency-key → mesma resposta
+- Transação atômica → débito e crédito juntos
+- Rollback em falha → saldos inalterados
+- Concorrência → sem race conditions
+
+**Error Handling:**
+- Saldo insuficiente → 402 com mensagem clara
+- Destinatário não encontrado → 404 com mensagem clara
+- Erro interno → 500 sem expor detalhes
+- Serviço indisponível → 503 com Retry-After
+
+**Rate Limiting (se aplicável):**
+- Múltiplas requisições → 429 após limite
+- Headers X-RateLimit-* presentes
+- Retry-After indicado
+
+### Padrões de Teste para APIs
+
+**Teste de Autorização:**
+```typescript
+// TypeScript + Supertest
+it('deve rejeitar requisição sem token (401)', async () => {
+  const response = await request(app)
+    .post('/api/v1/transactions')
+    .send({ recipient_id: 'user123', amount: 100 });
+  
+  expect(response.status).toBe(401);
+});
+```
+
+**Teste de Idempotência:**
+```typescript
+it('deve ser idempotente com mesma idempotency-key', async () => {
+  const key = 'transfer-123';
+  
+  const response1 = await request(app)
+    .post('/api/v1/transactions')
+    .set('Authorization', `Bearer ${token}`)
+    .set('Idempotency-Key', key)
+    .send({ recipient_id: 'user123', amount: 100 });
+  
+  const response2 = await request(app)
+    .post('/api/v1/transactions')
+    .set('Authorization', `Bearer ${token}`)
+    .set('Idempotency-Key', key)
+    .send({ recipient_id: 'user123', amount: 100 });
+  
+  expect(response2.body.transaction_id).toBe(response1.body.transaction_id);
+  // Verificar que apenas 1 transação foi criada
+});
+```
+
+Consulte TEST_STRATEGY e os guides em [utils/testes/](../../utils/testes/) para código e estratégias por camada.
+
 ## Análise de Impacto em Escala
 
 - **Segurança em escala**: Authorization correta em cada API protege dados e funcionalidades em ambientes distribuídos e microserviços.

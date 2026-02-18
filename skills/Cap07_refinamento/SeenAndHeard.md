@@ -186,6 +186,160 @@ Questione:
 - "Mensagem culpabilizante 'Você digitou errado'" → Tom negativo e frustrante
 - "Mensagem sem ação sugerida" → Usuário não sabe o que fazer a seguir
 
+## Implementando Testes de Feedback e Acessibilidade
+
+Para validar feedback e acessibilidade (Seen and Heard), consulte [TEST_STRATEGY.md](../../utils/testes/TEST_STRATEGY.md) com seu requisito/UI para gerar relatório; use o relatório com [TEST_COMPONENT_GUIDE.md](../../utils/testes/TEST_COMPONENT_GUIDE.md) e [TEST_E2E_GUIDE.md](../../utils/testes/TEST_E2E_GUIDE.md) para implementação. Orientações:
+
+### Testes Recomendados por Aspecto
+
+**Feedback Visual:**
+- **Componentes**: Testar exibição de mensagens (sucesso, erro, info), indicadores de loading, estados visuais
+- **E2E**: Verificar que feedback aparece no momento certo e é visualmente distinto
+
+**Clareza:**
+- **Componentes**: Verificar textos de mensagens, labels, instruções
+- **E2E**: Confirmar que linguagem é adequada ao público e não técnica demais
+
+**Acessibilidade (WCAG):**
+- **Componentes**: Testar ARIA roles, labels, navegação por teclado, contraste de cores
+- **E2E**: Verificar compatibilidade com leitores de tela, estrutura semântica
+
+**Feedback Sonoro (quando aplicável):**
+- **Componentes**: Verificar que avisos sonoros são configuráveis
+- **E2E**: Testar preferências de som, alternativas visuais
+
+**Consistência:**
+- **Componentes**: Validar padrões de feedback em todos os componentes
+- **E2E**: Verificar que padrões são mantidos em toda a aplicação
+
+### Exemplo de Cobertura Seen and Heard em Testes
+
+**Feedback Visual:**
+
+```typescript
+// React Testing Library
+it('deve exibir mensagem de sucesso após operação', async () => {
+  const user = userEvent.setup();
+  render(<TransferForm onSubmit={successSubmit} />);
+  
+  await user.type(screen.getByLabelText(/Destinatário/), 'user123');
+  await user.type(screen.getByLabelText(/Valor/), '500');
+  await user.click(screen.getByRole('button', { name: /Transferir/ }));
+  
+  // Verificar mensagem de sucesso
+  await waitFor(() => {
+    const successMessage = screen.getByRole('status');
+    expect(successMessage).toHaveTextContent(/sucesso/i);
+    expect(successMessage).toBeVisible();
+  });
+});
+
+it('deve exibir indicador de loading durante operação', async () => {
+  const user = userEvent.setup();
+  const slowSubmit = jest.fn(() => new Promise(resolve => setTimeout(resolve, 100)));
+  
+  render(<TransferForm onSubmit={slowSubmit} />);
+  
+  await user.type(screen.getByLabelText(/Destinatário/), 'user123');
+  await user.type(screen.getByLabelText(/Valor/), '500');
+  await user.click(screen.getByRole('button'));
+  
+  // Verificar loading
+  expect(screen.getByRole('status')).toHaveTextContent(/Processando/i);
+  expect(screen.getByRole('button')).toHaveAttribute('aria-busy', 'true');
+});
+```
+
+**Acessibilidade (ARIA):**
+
+```typescript
+// React Testing Library + jest-axe
+import { axe } from 'jest-axe';
+
+it('deve não ter violações de acessibilidade', async () => {
+  const { container } = render(<TransferForm />);
+  
+  const results = await axe(container);
+  expect(results).toHaveNoViolations();
+});
+
+it('mensagem de erro deve ser anunciada para leitores de tela', async () => {
+  const user = userEvent.setup();
+  const failSubmit = jest.fn(() => Promise.reject(new Error('Saldo insuficiente')));
+  
+  render(<TransferForm onSubmit={failSubmit} />);
+  
+  await user.type(screen.getByLabelText(/Destinatário/), 'user123');
+  await user.type(screen.getByLabelText(/Valor/), '500');
+  await user.click(screen.getByRole('button'));
+  
+  // Verificar ARIA live region
+  await waitFor(() => {
+    const errorMessage = screen.getByRole('alert');
+    expect(errorMessage).toHaveAttribute('aria-live', 'polite');
+    expect(errorMessage).toBeVisible();
+  });
+});
+
+it('deve ter navegação por teclado funcional', async () => {
+  const user = userEvent.setup();
+  render(<TransferForm />);
+  
+  // Tab para navegar
+  await user.tab();
+  expect(screen.getByLabelText(/Destinatário/)).toHaveFocus();
+  
+  await user.tab();
+  expect(screen.getByLabelText(/Valor/)).toHaveFocus();
+  
+  await user.tab();
+  expect(screen.getByRole('button', { name: /Transferir/ })).toHaveFocus();
+  
+  // Enter para submeter
+  await user.keyboard('{Enter}');
+  // Verificar que submit foi acionado...
+});
+```
+
+**Java (Selenium + Axe-core):**
+
+```java
+// Teste de acessibilidade com axe-core
+@Test
+@DisplayName("Deve não ter violações de acessibilidade")
+void shouldHaveNoAccessibilityViolations() {
+    driver.get(BASE_URL + "/transfer");
+    
+    // Injetar axe-core
+    AxeBuilder axe = new AxeBuilder();
+    Results results = axe.analyze(driver);
+    
+    // Verificar que não há violações
+    assertEquals(0, results.getViolations().size(), 
+        "Página tem violações de acessibilidade: " + results.getViolations());
+}
+
+@Test
+@DisplayName("Deve exibir feedback de loading visível")
+void shouldShowLoadingFeedback() {
+    driver.get(BASE_URL + "/transfer");
+    
+    // Preencher e submeter
+    driver.findElement(By.name("recipient_id")).sendKeys("user123");
+    driver.findElement(By.name("amount")).sendKeys("500");
+    driver.findElement(By.cssSelector("button[type='submit']")).click();
+    
+    // Verificar loading
+    WebElement loadingIndicator = wait.until(
+        ExpectedConditions.presenceOfElementLocated(By.cssSelector("[role='status']"))
+    );
+    assertTrue(loadingIndicator.isDisplayed());
+    assertTrue(loadingIndicator.getText().contains("Processando"));
+}
+```
+
+Os guides em [utils/testes/](../../utils/testes/) fornecem exemplos em TypeScript (jest-axe, RTL, Playwright) e Java (Selenium, Axe-core).
+
 ## Checklist de Análise Seen and Heard
 
 Ao aplicar a heurística, verifique:

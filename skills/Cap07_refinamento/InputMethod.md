@@ -194,6 +194,229 @@ Questione:
 - "Sistema não sugere correção para email com erro de digitação" → Perde oportunidade de ajudar
 - "Data rejeitada por ter espaço extra" → Tolerância muito baixa a variações
 
+## Implementando Testes de Métodos de Entrada
+
+Para validar métodos de entrada (Input Method), consulte [TEST_STRATEGY.md](../../utils/testes/TEST_STRATEGY.md) com seu requisito/UI para gerar relatório; use o relatório com [TEST_COMPONENT_GUIDE.md](../../utils/testes/TEST_COMPONENT_GUIDE.md) e [TEST_E2E_GUIDE.md](../../utils/testes/TEST_E2E_GUIDE.md) para implementação. Orientações:
+
+### Testes Recomendados por Método
+
+**Typing (Digitação):**
+- **Componentes**: Simular digitação com userEvent, verificar validações em tempo real
+- **E2E**: Testar digitação completa em campos, validação ao sair do campo (blur)
+
+**Copy/Paste:**
+- **Componentes**: Simular copiar e colar com userEvent.paste(), verificar sanitização
+- **E2E**: Testar colar em campos, verificar formatação e validação
+
+**Import (Importação):**
+- **Integração**: Testar parsing de arquivos (CSV, JSON, XML), validação de conteúdo
+- **E2E**: Upload de arquivos, feedback de progresso, tratamento de erros
+
+**Drag and Drop:**
+- **Componentes**: Simular drag and drop, verificar estados visuais
+- **E2E**: Testar arrastar arquivos, ordenação por drag, interações complexas
+
+**API/URL Parameters:**
+- **Serviço**: Testar endpoints com parâmetros, query strings, headers
+- **E2E**: Testar deep links, parâmetros na URL, estado preservado
+
+### Exemplo de Cobertura Input Method em Testes
+
+**Typing (Digitação):**
+
+```typescript
+// React Testing Library
+it('deve validar email em tempo real ao digitar', async () => {
+  const user = userEvent.setup();
+  render(<EmailField />);
+  
+  const input = screen.getByLabelText(/Email/);
+  
+  // Digitar email inválido
+  await user.type(input, 'invalid-email');
+  
+  // Verificar validação
+  expect(screen.getByText(/Email inválido/)).toBeInTheDocument();
+  
+  // Corrigir para email válido
+  await user.clear(input);
+  await user.type(input, 'valid@example.com');
+  
+  // Verificar que erro sumiu
+  expect(screen.queryByText(/Email inválido/)).not.toBeInTheDocument();
+});
+
+it('deve permitir digitação lenta e rápida', async () => {
+  const user = userEvent.setup();
+  render(<SearchField onSearch={mockSearch} />);
+  
+  const input = screen.getByLabelText(/Buscar/);
+  
+  // Digitação rápida (debounced)
+  await user.type(input, 'query');
+  
+  // Aguardar debounce
+  await waitFor(() => {
+    expect(mockSearch).toHaveBeenCalledWith('query');
+  }, { timeout: 1000 });
+  
+  // Verificar que não foi chamado múltiplas vezes
+  expect(mockSearch).toHaveBeenCalledTimes(1);
+});
+```
+
+**Copy/Paste:**
+
+```typescript
+it('deve aceitar valor colado e formatar corretamente', async () => {
+  const user = userEvent.setup();
+  render(<PhoneField />);
+  
+  const input = screen.getByLabelText(/Telefone/);
+  
+  // Colar valor não formatado
+  await user.click(input);
+  await user.paste('11987654321');
+  
+  // Verificar formatação aplicada
+  expect(input).toHaveValue('(11) 98765-4321');
+});
+
+it('deve sanitizar valor colado com espaços extras', async () => {
+  const user = userEvent.setup();
+  render(<RecipientIdField />);
+  
+  const input = screen.getByLabelText(/Destinatário/);
+  
+  // Colar com espaços
+  await user.click(input);
+  await user.paste('  user123  ');
+  
+  // Verificar que espaços foram removidos
+  expect(input).toHaveValue('user123');
+});
+```
+
+**Import (Importação):**
+
+```typescript
+// Playwright (E2E)
+test('deve importar CSV com múltiplos usuários', async ({ page }) => {
+  await page.goto('/users/import');
+  
+  // Upload de arquivo
+  const fileInput = page.locator('input[type="file"]');
+  await fileInput.setInputFiles('./fixtures/users.csv');
+  
+  // Aguardar processamento
+  await expect(page.locator('[role="status"]')).toContainText(/Processando/);
+  
+  // Verificar sucesso
+  await expect(page.locator('[role="alert"]')).toContainText(/50 usuários importados/);
+  
+  // Verificar que usuários aparecem na lista
+  await page.goto('/users');
+  const rows = page.locator('table tbody tr');
+  await expect(rows).toHaveCount(50);
+});
+
+test('deve exibir erro em arquivo inválido', async ({ page }) => {
+  await page.goto('/users/import');
+  
+  // Upload de arquivo inválido
+  const fileInput = page.locator('input[type="file"]');
+  await fileInput.setInputFiles('./fixtures/invalid.txt');
+  
+  // Verificar erro
+  await expect(page.locator('[role="alert"]'))
+    .toContainText(/Formato de arquivo inválido/);
+});
+```
+
+**Drag and Drop:**
+
+```typescript
+// React Testing Library
+it('deve reordenar itens por drag and drop', async () => {
+  render(<SortableList items={['Item 1', 'Item 2', 'Item 3']} />);
+  
+  const item1 = screen.getByText('Item 1');
+  const item3 = screen.getByText('Item 3');
+  
+  // Simular drag and drop
+  fireEvent.dragStart(item1);
+  fireEvent.dragEnter(item3);
+  fireEvent.drop(item3);
+  
+  // Verificar nova ordem
+  const items = screen.getAllByRole('listitem');
+  expect(items[0]).toHaveTextContent('Item 2');
+  expect(items[1]).toHaveTextContent('Item 3');
+  expect(items[2]).toHaveTextContent('Item 1');
+});
+```
+
+**Java (Selenium):**
+
+```java
+@Test
+@DisplayName("Deve validar campo ao colar valor")
+void shouldValidateFieldOnPaste() {
+    driver.get(BASE_URL + "/transfer");
+    
+    WebElement recipientInput = driver.findElement(By.name("recipient_id"));
+    
+    // Simular colar (Ctrl+V / Cmd+V)
+    recipientInput.click();
+    recipientInput.sendKeys(Keys.chord(Keys.CONTROL, "v"));
+    
+    // Aguardar validação
+    wait.until(ExpectedConditions.presenceOfElementLocated(
+        By.cssSelector(".validation-message")
+    ));
+}
+
+@Test
+@DisplayName("Deve importar arquivo CSV")
+void shouldImportCSVFile() {
+    driver.get(BASE_URL + "/users/import");
+    
+    // Upload de arquivo
+    WebElement fileInput = driver.findElement(By.cssSelector("input[type='file']"));
+    String filePath = new File("fixtures/users.csv").getAbsolutePath();
+    fileInput.sendKeys(filePath);
+    
+    // Aguardar processamento
+    wait.until(ExpectedConditions.presenceOfElementLocated(
+        By.cssSelector("[role='status']")
+    ));
+    
+    // Verificar sucesso
+    WebElement successMessage = wait.until(
+        ExpectedConditions.presenceOfElementLocated(By.cssSelector("[role='alert']"))
+    );
+    assertTrue(successMessage.getText().contains("importados"));
+}
+```
+
+### Integração com Outras Heurísticas
+
+**Input Method + Baica:**
+- Validar boundaries, nulls e special chars em todos os métodos de entrada
+- Exemplo: valor colado pode conter caracteres especiais que digitação não permitiria
+
+**Input Method + SeenAndHeard:**
+- Feedback visual ao colar (indicar que valor foi aceito)
+- Feedback de progresso ao importar arquivos
+- Mensagens claras de erro em formatos inválidos
+
+**Input Method + Chique:**
+- Drag handles visíveis e acessíveis
+- Estados visuais ao arrastar (destacar área de drop)
+- Indicação de arquivo selecionado para import
+
+Os guides [TEST_COMPONENT_GUIDE.md](../../utils/testes/TEST_COMPONENT_GUIDE.md) e [TEST_E2E_GUIDE.md](../../utils/testes/TEST_E2E_GUIDE.md) fornecem exemplos em TypeScript e Java.
+
 ## Checklist de Análise Input Method
 
 Ao aplicar a heurística, verifique:

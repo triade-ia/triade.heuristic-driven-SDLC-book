@@ -51,6 +51,17 @@ Liste o que falta tecnicamente para que o código seja escrito sem impedimentos 
 
 Defina o que deve ser resolvido hoje para o desenvolvimento começar e o que fica para o backlog.
 
+## Critérios de Saída
+
+O relatório deve conter:
+
+1. **Questionamentos Críticos** - Análise completa das 8 dimensões (Who, What, When, Where, Why, How, Keep, Eliminate) com perguntas difíceis não respondidas pelo requisito
+2. **Gaps de Implementação** - Lista técnica do que falta para iniciar o desenvolvimento (contratos de API, regras de negócio, mensagens de erro, etc.)
+3. **Keep (Manter)** - Lista do que é inegociável para segurança e funcionamento básico
+4. **Eliminate (Eliminar)** - Identificação de "perfumaria" ou suposições que podem ser removidas para acelerar entrega
+5. **Lista de Priorização** - Separação clara entre o que deve ser resolvido agora vs. backlog
+6. **Parecer Técnico de Viabilidade** - Avaliação sobre se o requisito está pronto para desenvolvimento ou necessita refinamento
+
 ## Objetivo Final
 
 Fornecer um Parecer Técnico de Viabilidade Imediata. O output deve atuar como um divisor de águas que separa o que é essencial para a sobrevivência do produto do que é desperdício. O resultado deve garantir que o time foque no "Mínimo Inegociável", eliminando ambiguidades e tornando os riscos técnicos visíveis antes do início da codificação.

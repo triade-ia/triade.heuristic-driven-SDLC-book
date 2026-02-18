@@ -56,6 +56,17 @@ Como impedir que a falha de um elo bloqueie o usuário.
 #### Contrato
 Comunicação Síncrona vs. Assíncrona.
 
+## Critérios de Saída
+
+O relatório deve conter:
+
+1. **Mapeamento de Relacionamentos** - Identificação completa de entidades e serviços envolvidos com seus tipos de relacionamento (por ID, denormalização, etc.)
+2. **Matriz de Propagação de Impacto** - Análise do efeito dominó incluindo mudança na origem, falha de vizinho e problemas de concorrência
+3. **Gatilhos de Ação Manual** - Recomendações específicas de heurísticas complementares (CRUD, Count, Position, Selection) para cada relacionamento identificado
+4. **Decisões de Desacoplamento** - Estratégias propostas para isolamento e resiliência
+5. **Análise de Contratos** - Definição de comunicação síncrona vs. assíncrona para cada dependência
+6. **Riscos de Acoplamento** - Identificação de acoplamentos ocultos e pontos críticos de falha
+
 ## Objetivo Final
 
 Identificar acoplamentos ocultos e fornecer um mapa de roteiro. O relatório deve indicar não apenas os riscos atuais, mas orientar o próximo passo do processo investigativo, direcionando o usuário para as heurísticas complementares necessárias para blindar o requisito.

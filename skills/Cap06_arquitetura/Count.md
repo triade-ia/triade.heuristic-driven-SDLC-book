@@ -187,6 +187,182 @@ A heurística Count fornece cenários-chave para testes:
 - **Teste de Muitos**: Identificar limites de performance e capacidade máxima
 - **Teste de Crescimento**: Simular crescimento gradual de zero para muitos
 
+## Implementando Testes para Cenários Count
+
+A heurística Count (0, 1, Muitos) fornece cenários para estruturar testes. Consulte [TEST_STRATEGY.md](../../utils/testes/TEST_STRATEGY.md) com seu requisito/código para gerar relatório; use o relatório com os guides em [utils/testes/](../../utils/testes/) (TEST_UNIT_GUIDE, TEST_INTEGRATION_GUIDE, etc.) para implementação. Resumo:
+
+### Estratégia de Testes por Cenário
+
+**Zero (0) - Ausência Total:**
+- **Unitários**: Funções com listas vazias, valores ausentes, defaults quando não há dados
+- **Integração**: Queries que retornam vazio, comportamento com tabelas vazias
+- **Serviço**: APIs retornando arrays vazios [], estados vazios
+- **E2E**: UI com empty states, mensagens de "nenhum item encontrado"
+
+**Um (1) - Caso Simplificado:**
+- **Unitários**: Funções com elemento único, otimizações específicas
+- **Integração**: Queries com resultado único (findOne, findById)
+- **Serviço**: APIs retornando objeto único vs. array com 1 elemento
+- **E2E**: Visualização de item único, formulários de edição
+
+**Muitos (N) - Alto Volume:**
+- **Unitários**: Funções com múltiplos elementos, performance algorítmica (O(N), O(N²))
+- **Integração**: Paginação, indexação, queries com milhares de registros
+- **Serviço**: APIs com paginação, rate limiting, filtros eficientes
+- **E2E**: Listagens paginadas, scrolling infinito, performance de renderização
+
+### Aplicação em Cada Camada
+
+**Testes Unitários com Count:**
+
+```typescript
+// TypeScript
+describe('calculateTotal - Count (0, 1, Muitos)', () => {
+  it('deve retornar 0 para lista vazia (Count - Zero)', () => {
+    const result = calculateTotal([]);
+    expect(result).toBe(0);
+  });
+  
+  it('deve calcular total para 1 item (Count - Um)', () => {
+    const result = calculateTotal([{ amount: 100 }]);
+    expect(result).toBe(100);
+  });
+  
+  it('deve calcular total para múltiplos itens (Count - Muitos)', () => {
+    const items = [
+      { amount: 100 },
+      { amount: 200 },
+      { amount: 300 }
+    ];
+    const result = calculateTotal(items);
+    expect(result).toBe(600);
+  });
+  
+  it('deve performar bem com 10.000 itens (Count - Muitos + Performance)', () => {
+    const items = Array.from({ length: 10000 }, (_, i) => ({ amount: i + 1 }));
+    
+    const start = performance.now();
+    const result = calculateTotal(items);
+    const duration = performance.now() - start;
+    
+    expect(result).toBe(50005000);
+    expect(duration).toBeLessThan(100); // < 100ms
+  });
+});
+```
+
+**Testes de Integração com Count:**
+
+```java
+// Java + JUnit 5
+@Nested
+@DisplayName("Count scenarios")
+class CountScenarios {
+    
+    @Test
+    @DisplayName("Deve retornar lista vazia quando não há usuários (Count - Zero)")
+    void shouldReturnEmptyListWhenNoUsers() {
+        List<User> users = userRepository.findAll();
+        assertTrue(users.isEmpty());
+    }
+    
+    @Test
+    @DisplayName("Deve retornar lista com 1 usuário (Count - Um)")
+    void shouldReturnSingleUser() {
+        userRepository.save(new User("user@test.com"));
+        
+        List<User> users = userRepository.findAll();
+        assertEquals(1, users.size());
+    }
+    
+    @Test
+    @DisplayName("Deve paginar corretamente com 1000 usuários (Count - Muitos)")
+    void shouldPaginateWithManyUsers() {
+        // Criar 1000 usuários
+        for (int i = 0; i < 1000; i++) {
+            userRepository.save(new User("user" + i + "@test.com"));
+        }
+        
+        // Buscar primeira página
+        Page<User> page = userRepository.findAll(PageRequest.of(0, 20));
+        
+        assertEquals(20, page.getContent().size());
+        assertEquals(1000, page.getTotalElements());
+        assertEquals(50, page.getTotalPages());
+    }
+}
+```
+
+**Testes E2E com Count:**
+
+```typescript
+// Playwright
+test('deve exibir empty state quando não há transações (Count - Zero)', async ({ page }) => {
+  await page.goto('/transactions');
+  
+  await expect(page.locator('[data-testid="empty-state"]'))
+    .toContainText('Nenhuma transação encontrada');
+  await expect(page.locator('[data-testid="empty-state-cta"]'))
+    .toContainText('Fazer primeira transferência');
+});
+
+test('deve renderizar lista com múltiplas transações (Count - Muitos)', async ({ page }) => {
+  // Setup: Criar 50 transações
+  await createManyTransactions(50);
+  
+  await page.goto('/transactions');
+  
+  // Verificar paginação
+  const rows = page.locator('table tbody tr');
+  await expect(rows).toHaveCount(20); // Primeira página
+  
+  // Verificar indicador de páginas
+  await expect(page.locator('[data-testid="pagination"]'))
+    .toContainText('1 de 3');
+});
+```
+
+### Identificando Bugs de Limite com Count
+
+A heurística Count ajuda a identificar bugs comuns:
+
+**Off-by-one errors:**
+```typescript
+// Teste que pega erro de índice
+it('deve processar todos os elementos (não N-1)', () => {
+  const items = [1, 2, 3, 4, 5];
+  const result = processAll(items);
+  expect(result.processed).toBe(5); // Não 4!
+});
+```
+
+**Divisão por zero:**
+```typescript
+// Teste para evitar divisão por zero
+it('deve retornar 0 quando lista vazia (não dividir por 0)', () => {
+  const result = calculateAverage([]);
+  expect(result).toBe(0); // Não NaN ou Infinity
+});
+```
+
+**Memory leaks com Muitos:**
+```typescript
+// Teste de performance e memória
+it('não deve estourar memória com 100k itens', () => {
+  const startMemory = process.memoryUsage().heapUsed;
+  
+  processLargeList(100_000);
+  
+  const endMemory = process.memoryUsage().heapUsed;
+  const memoryIncrease = endMemory - startMemory;
+  
+  // Aumento aceitável (ex: < 50MB)
+  expect(memoryIncrease).toBeLessThan(50 * 1024 * 1024);
+});
+```
+
+Consulte TEST_STRATEGY e os guides em [utils/testes/](../../utils/testes/) para exemplos em TypeScript e Java por camada.
+
 ## Checklist de Análise Count
 
 Ao aplicar a heurística, verifique:

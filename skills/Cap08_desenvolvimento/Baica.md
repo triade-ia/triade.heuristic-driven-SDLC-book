@@ -147,12 +147,68 @@ Ao elaborar casos de teste com Baica:
 - Inclua testes para: valores nos limites (0, máximo, -1 quando aplicável), null/vazio, strings com caracteres especiais e emojis, formatos inválidos (e-mail, data), e payloads que simulam padrões de falha (injection, XSS).
 - Para cada dimensão, tenha pelo menos um caso "válido no limite" e um "inválido" com resposta esperada clara.
 
+#### Implementação de Testes Baica por Camada
+
+Para decidir QUAIS testes implementar aplicando Baica:
+
+1. **Consulte [TEST_STRATEGY.md](../../utils/testes/TEST_STRATEGY.md)** com seu requisito e/ou código. A skill analisa, identifica aplicação de Baica e gera relatório em `output/test-strategy-*.md` com casos de teste por camada.
+2. **Para implementar**, use o relatório como contexto com os guides:
+   - [TEST_UNIT_GUIDE.md](../../utils/testes/TEST_UNIT_GUIDE.md) — Testes unitários
+   - [TEST_INTEGRATION_GUIDE.md](../../utils/testes/TEST_INTEGRATION_GUIDE.md) — Testes de integração
+   - [TEST_SERVICE_GUIDE.md](../../utils/testes/TEST_SERVICE_GUIDE.md) — Testes de API
+   - [TEST_COMPONENT_GUIDE.md](../../utils/testes/TEST_COMPONENT_GUIDE.md) — Testes de componentes
+   - [TEST_E2E_GUIDE.md](../../utils/testes/TEST_E2E_GUIDE.md) — Testes E2E
+
 ## Análise de Impacto em Escala
 
 - **Prevenção de falhas em larga escala**: Um único input malformado pode corromper dados ou derrubar serviços; validação rigorosa evita cascata de falhas.
 - **Redução de débito técnico**: Bugs de borda em produção são caros de depurar; tratá-los na base do código reduz custo de manutenção.
 - **Segurança em camadas**: Validação de input é a primeira linha de defesa contra ataques automatizados; sistemas escaláveis são alvos maiores.
 - **Comportamento previsível**: Respostas controladas a inputs anômalos evitam consumo excessivo de recursos e facilitam evolução do produto.
+
+## Implementando Testes Baseados em Baica
+
+A heurística Baica é especialmente poderosa quando traduzida em testes automatizados. Para implementar testes que cobrem as cinco dimensões:
+
+1. **Identifique as entradas de dados** no código ou API
+2. **Para cada entrada, crie testes nas camadas apropriadas:**
+   - Unitários: funções de validação isoladas
+   - Integração: fluxo de dados entre módulos
+   - Serviço: endpoints de API
+   - E2E: interface do usuário
+
+3. Use o **relatório** gerado por TEST_STRATEGY como contexto ao chamar os guides acima para obter código em TypeScript e Java.
+
+### Exemplo de Cobertura Baica em Testes
+
+Para uma função de validação de amount, os testes devem cobrir:
+
+**Boundaries:**
+- amount = 0 (rejeitar)
+- amount = -1 (rejeitar)
+- amount = 1 (aceitar - mínimo válido)
+- amount = 1000000 (aceitar - máximo válido)
+- amount = 1000001 (rejeitar - acima do máximo)
+
+**Nulls/Empty:**
+- amount = null (rejeitar)
+- amount = undefined (rejeitar)
+
+**Special Chars (quando aplicável a strings):**
+- Caracteres Unicode
+- Emojis
+- Scripts maliciosos
+
+**Invalid Formats:**
+- Tipos incorretos (string quando esperado number)
+- Formatos inválidos para campos específicos (email, data, CPF)
+
+**Failure Patterns:**
+- Inputs que podem causar SQL injection
+- Inputs que podem causar XSS
+- Payloads muito grandes (DoS)
+
+Consulte TEST_STRATEGY (com requisito/código) para gerar o relatório e, em seguida, os guides em [utils/testes/](../../utils/testes/) para exemplos em TypeScript e Java.
 
 ## Checklist de Análise Baica
 
