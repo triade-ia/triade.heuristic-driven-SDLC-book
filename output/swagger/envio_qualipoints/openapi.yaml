@@ -1,0 +1,460 @@
+openapi: 3.0.3
+
+info:
+  title: QualiPoints Transfer API
+  description: |
+    API REST para transferência de QualiPoints entre usuários.
+
+    ## Visão Geral
+    - Operação **síncrona**: o cliente envia a requisição e aguarda confirmação imediata.
+    - Operação **atômica**: débito do remetente, crédito do destinatário e registro ocorrem na mesma transação de banco.
+    - **Idempotência via header `Idempotency-Key`**: retentativas seguras sem risco de débito duplo.
+    - Remetente identificado pelo token de autenticação; não enviado no corpo da requisição.
+
+    ## Escopo MVP
+    - Transferência entre usuários (1 a 10.000 QualiPoints por transação).
+    - Consulta das últimas 10 transações do usuário autenticado.
+    - Sem aprovação manual, comprovante PDF, e-mail automático ou notificação push.
+  version: "2.0.0"
+  contact:
+    name: Equipe QualiPoints
+
+servers:
+  - url: https://api.qualipoints.com
+    description: Produção
+  - url: https://api-staging.qualipoints.com
+    description: Homologação
+
+tags:
+  - name: Transferências
+    description: Envio de QualiPoints entre usuários
+  - name: Transações
+    description: Consulta do histórico de transações
+
+paths:
+  /api/v1/transfers:
+    post:
+      summary: Enviar QualiPoints para outro usuário
+      description: |
+        Transfere QualiPoints do usuário autenticado (remetente, identificado pelo token)
+        para o destinatário indicado no body.
+
+        **Atomicidade:** débito, crédito e registro ocorrem em uma única transação de banco.
+        Em caso de falha parcial, toda a operação é revertida (rollback).
+
+        **Idempotência:** o header `Idempotency-Key` é obrigatório. Requisições repetidas
+        com a mesma chave retornam o resultado original sem reprocessar a operação.
+
+        **Timeout:** a API responde em até 10 segundos; caso contrário, retorna 504.
+        Em timeout ou falha de rede, o cliente pode reenviar com a **mesma** `Idempotency-Key`.
+      operationId: sendQualiPoints
+      tags:
+        - Transferências
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransferRequest'
+            examples:
+              exemplo_basico:
+                summary: Envio de 100 QualiPoints
+                value:
+                  recipientId: "usr_abc123"
+                  amount: 100
+              envio_minimo:
+                summary: Envio mínimo (1 QualiPoint)
+                value:
+                  recipientId: "usr_xyz789"
+                  amount: 1
+              envio_maximo:
+                summary: Envio máximo (10.000 QualiPoints)
+                value:
+                  recipientId: "usr_xyz789"
+                  amount: 10000
+      responses:
+        '200':
+          description: Transferência realizada com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransferResponse'
+              examples:
+                sucesso:
+                  summary: Envio concluído
+                  value:
+                    transactionId: "txn_9f8e7d6c5b4a"
+                    amount: 100
+                    recipientId: "usr_abc123"
+                    status: "completed"
+                    completedAt: "2025-02-18T14:30:00Z"
+        '400':
+          description: Dados inválidos (valor zero, negativo, fora do intervalo ou formato incorreto)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                valor_invalido:
+                  summary: Valor fora do intervalo permitido
+                  value:
+                    code: "INVALID_AMOUNT"
+                    message: "Valor deve ser entre 1 e 10000."
+        '401':
+          description: Não autenticado ou token inválido/expirado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                nao_autenticado:
+                  summary: Token ausente ou inválido
+                  value:
+                    code: "UNAUTHORIZED"
+                    message: "Sessão expirada. Faça login novamente."
+        '403':
+          description: Conta do remetente bloqueada ou não ativa
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                conta_inativa:
+                  summary: Conta bloqueada
+                  value:
+                    code: "ACCOUNT_NOT_ACTIVE"
+                    message: "Sua conta não está ativa para envio. Entre em contato com o suporte."
+        '404':
+          description: Destinatário não encontrado ou inativo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                destinatario_nao_encontrado:
+                  summary: ID de destinatário inexistente ou conta inativa
+                  value:
+                    code: "RECIPIENT_NOT_FOUND"
+                    message: "Destinatário não encontrado. Verifique o ID ou o status da conta."
+        '408':
+          description: Timeout da requisição (cliente)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                timeout_cliente:
+                  summary: Request Timeout
+                  value:
+                    code: "REQUEST_TIMEOUT"
+                    message: "A operação demorou mais que o esperado. Tente novamente com a mesma chave de idempotência."
+        '409':
+          description: Envio para a própria conta não é permitido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                auto_transferencia:
+                  summary: Remetente igual ao destinatário
+                  value:
+                    code: "SELF_TRANSFER_NOT_ALLOWED"
+                    message: "Não é permitido enviar QualiPoints para a própria conta."
+        '422':
+          description: Saldo insuficiente para realizar a transferência
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InsufficientBalanceError'
+              examples:
+                saldo_insuficiente:
+                  summary: Saldo abaixo do valor solicitado
+                  value:
+                    code: "INSUFFICIENT_BALANCE"
+                    message: "Saldo insuficiente. Seu saldo atual não permite este envio."
+                    currentBalance: 50
+        '500':
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                erro_interno:
+                  summary: Erro inesperado
+                  value:
+                    code: "INTERNAL_ERROR"
+                    message: "Ocorreu um erro. Tente novamente em instantes."
+        '504':
+          description: Gateway Timeout — API excedeu 10 segundos de processamento
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                gateway_timeout:
+                  summary: Timeout da API
+                  value:
+                    code: "REQUEST_TIMEOUT"
+                    message: "A operação demorou mais que o esperado. Tente novamente com a mesma chave de idempotência."
+      security:
+        - bearerAuth: []
+
+  /api/v1/transfers/recent:
+    get:
+      summary: Listar transações recentes do usuário autenticado
+      description: |
+        Retorna as **últimas 10 transações** do usuário autenticado (como remetente
+        ou destinatário), ordenadas da mais recente para a mais antiga.
+
+        **Controle de acesso:** cada usuário vê apenas as próprias transações.
+        A API filtra automaticamente pelo identificador do usuário logado (token).
+
+        No MVP não há filtros avançados nem paginação.
+      operationId: getRecentTransactions
+      tags:
+        - Transações
+      responses:
+        '200':
+          description: Lista das últimas 10 transações
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecentTransactionsResponse'
+              examples:
+                lista_recente:
+                  summary: Últimas transações do usuário
+                  value:
+                    transactions:
+                      - transactionId: "txn_9f8e7d6c5b4a"
+                        amount: 100
+                        senderId: "usr_me123"
+                        recipientId: "usr_abc123"
+                        direction: "sent"
+                        status: "completed"
+                        completedAt: "2025-02-18T14:30:00Z"
+                      - transactionId: "txn_1a2b3c4d5e6f"
+                        amount: 250
+                        senderId: "usr_xyz789"
+                        recipientId: "usr_me123"
+                        direction: "received"
+                        status: "completed"
+                        completedAt: "2025-02-17T09:15:00Z"
+        '401':
+          description: Não autenticado ou token inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                nao_autenticado:
+                  value:
+                    code: "UNAUTHORIZED"
+                    message: "Sessão expirada. Faça login novamente."
+        '500':
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - bearerAuth: []
+
+components:
+  parameters:
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      description: |
+        Chave única por **intenção de envio** (ex.: UUID gerado no App ao tocar em "Enviar").
+        Garante que retentativas com a mesma chave não resultem em débito duplo.
+        A API retorna o resultado original para chaves já processadas, sem reprocessar.
+      schema:
+        type: string
+        format: uuid
+        example: "550e8400-e29b-41d4-a716-446655440000"
+
+  schemas:
+    TransferRequest:
+      type: object
+      required:
+        - recipientId
+        - amount
+      properties:
+        recipientId:
+          type: string
+          description: |
+            ID do usuário destinatário. Deve ser um usuário existente, ativo e
+            diferente do remetente (identificado pelo token).
+          example: "usr_abc123"
+        amount:
+          type: integer
+          description: |
+            Quantidade de QualiPoints a transferir. Deve ser um número inteiro
+            positivo entre 1 e 10.000 (sem casas decimais).
+          minimum: 1
+          maximum: 10000
+          example: 100
+      example:
+        recipientId: "usr_abc123"
+        amount: 100
+
+    TransferResponse:
+      type: object
+      required:
+        - transactionId
+        - amount
+        - recipientId
+        - status
+        - completedAt
+      properties:
+        transactionId:
+          type: string
+          description: Identificador único da transação registrada.
+          example: "txn_9f8e7d6c5b4a"
+        amount:
+          type: integer
+          description: Quantidade de QualiPoints transferida.
+          minimum: 1
+          maximum: 10000
+          example: 100
+        recipientId:
+          type: string
+          description: ID do usuário que recebeu os QualiPoints.
+          example: "usr_abc123"
+        status:
+          type: string
+          description: Status final da transação.
+          enum:
+            - completed
+          example: "completed"
+        completedAt:
+          type: string
+          format: date-time
+          description: Data e hora de conclusão da transação (ISO 8601).
+          example: "2025-02-18T14:30:00Z"
+
+    TransactionItem:
+      type: object
+      required:
+        - transactionId
+        - amount
+        - senderId
+        - recipientId
+        - direction
+        - status
+        - completedAt
+      properties:
+        transactionId:
+          type: string
+          description: Identificador único da transação.
+          example: "txn_9f8e7d6c5b4a"
+        amount:
+          type: integer
+          description: Quantidade de QualiPoints transferida.
+          minimum: 1
+          maximum: 10000
+          example: 100
+        senderId:
+          type: string
+          description: ID do usuário que enviou os QualiPoints.
+          example: "usr_me123"
+        recipientId:
+          type: string
+          description: ID do usuário que recebeu os QualiPoints.
+          example: "usr_abc123"
+        direction:
+          type: string
+          description: |
+            Direção da transação em relação ao usuário autenticado.
+            `sent` = o usuário foi o remetente; `received` = o usuário foi o destinatário.
+          enum:
+            - sent
+            - received
+          example: "sent"
+        status:
+          type: string
+          description: Status da transação.
+          enum:
+            - completed
+          example: "completed"
+        completedAt:
+          type: string
+          format: date-time
+          description: Data e hora de conclusão da transação (ISO 8601).
+          example: "2025-02-18T14:30:00Z"
+
+    RecentTransactionsResponse:
+      type: object
+      required:
+        - transactions
+      properties:
+        transactions:
+          type: array
+          description: |
+            Lista das últimas 10 transações do usuário autenticado (como remetente
+            ou destinatário), ordenadas da mais recente para a mais antiga.
+          maxItems: 10
+          items:
+            $ref: '#/components/schemas/TransactionItem'
+
+    ErrorResponse:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          description: Código de erro legível por máquina.
+          enum:
+            - INVALID_AMOUNT
+            - UNAUTHORIZED
+            - ACCOUNT_NOT_ACTIVE
+            - RECIPIENT_NOT_FOUND
+            - SELF_TRANSFER_NOT_ALLOWED
+            - REQUEST_TIMEOUT
+            - INTERNAL_ERROR
+          example: "INVALID_AMOUNT"
+        message:
+          type: string
+          description: Mensagem descritiva do erro para exibição no App.
+          example: "Valor deve ser entre 1 e 10000."
+
+    InsufficientBalanceError:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          description: Código de erro legível por máquina.
+          enum:
+            - INSUFFICIENT_BALANCE
+          example: "INSUFFICIENT_BALANCE"
+        message:
+          type: string
+          description: Mensagem descritiva do erro para exibição no App.
+          example: "Saldo insuficiente. Seu saldo atual não permite este envio."
+        currentBalance:
+          type: integer
+          description: Saldo atual do remetente no momento da tentativa (opcional).
+          minimum: 0
+          example: 50
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        Token de autenticação Bearer JWT. O remetente é identificado pelo token;
+        não é necessário informar o ID do remetente no body da requisição.
+        Formato: `Authorization: Bearer <token>`
+
+security:
+  - bearerAuth: []

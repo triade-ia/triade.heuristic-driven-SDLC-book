@@ -31,10 +31,10 @@ Transformar heurísticas de teste de ferramentas reativas (usadas apenas na fase
 
 ```
 heuristic-driven-SDLC/
-├── setUp/                          # Configuração inicial e requisitos base
-│   └── REQ_FINAL.MD               # Especificação técnica do requisito
+├── input/                          # Requisito base de entrada
+│   └── REQ_INICIAL.MD             # Especificação técnica do requisito
 │
-├── skills/                         # Heurísticas organizadas por capítulo/etapa
+├── Skill/                          # Heurísticas organizadas por capítulo/etapa
 │   ├── Cap04_concepcao/           # Heurísticas de Concepção
 │   │   ├── UserScenarios.md       # Cenários de uso dinâmicos
 │   │   └── WWWWWHKE.MD            # Análise de contexto (Who, What, Where, When, Why, How, Keep, Exclude)
@@ -58,33 +58,42 @@ heuristic-driven-SDLC/
 │   │   ├── VADER.md               # Validação, Asserção, Dados, Exceções, Resultados
 │   │   └── FAILURE.md             # Cenários de falha
 │   │
-│   ├── Cap09_teste/               # Heurísticas de Teste
-│   │   ├── EMOTIONS.md            # Testes emocionais/comportamentais
-│   │   ├── FAILURE.md             # Testes de falha
-│   │   └── FLOOD.md               # Testes de carga e limites
-│   │
-│   └── utils/                      # Utilitários e ferramentas
-│       └── SWAGGER_API_DOC.md     # Geração de documentação OpenAPI
+│   └── Cap09_teste/               # Heurísticas de Teste
+│       ├── EMOTIONS.md            # Testes emocionais/comportamentais
+│       ├── FAILURE.md             # Testes de falha
+│       └── FLOOD.md               # Testes de carga e limites
 │
-├── example/                        # Exemplos práticos aplicados
-│   ├── Cap04_concepcao/           # Outputs da fase de concepção
-│   ├── Cap05_design/              # Outputs da fase de design
-│   ├── Cap06_arquitetura/         # Outputs da fase de arquitetura
-│   ├── Cap07_refinamento/         # Outputs da fase de refinamento
-│   ├── Cap08_desenvolvimento/     # Outputs da fase de desenvolvimento
-│   └── Cap09_teste/               # Outputs da fase de testes
+├── docs/                           # Documentação de suporte
+│   ├── builSwagger/
+│   │   └── SWAGGER_API_DOC.md     # Geração de documentação OpenAPI
+│   └── test/                       # Guias de testes
+│       ├── TEST_STRATEGY.md
+│       ├── TEST_UNIT_GUIDE.md
+│       ├── TEST_INTEGRATION_GUIDE.md
+│       ├── TEST_COMPONENT_GUIDE.md
+│       ├── TEST_SERVICE_GUIDE.md
+│       └── TEST_E2E_GUIDE.md
 │
-├── swagger-input/                  # Inputs para geração de Swagger
-│   └── CONSOLIDATED_API_SPEC.md   # Especificação consolidada da API
+├── example-book/                   # Exemplos práticos aplicados
+│   ├── cap-04-concepcao/          # Outputs da fase de concepção
+│   ├── cap-05-design/             # Outputs da fase de design
+│   ├── cap-06-arquitetura/        # Outputs da fase de arquitetura
+│   └── cap-07-refinamento/        # Outputs da fase de refinamento
 │
-├── swagger/                        # Documentação OpenAPI gerada
-│   └── envio_qualipoints/         # Exemplo: Transferência de QualiPoints
-│       ├── openapi.yaml           # Especificação OpenAPI 3.0.3
-│       └── README.md              # Documentação do endpoint
+├── output/                         # Artefatos gerados
+│   ├── requisito-revisado/        # Requisito revisado após aplicação das heurísticas
+│   │   └── REQ_INICIAL_V2.md
+│   └── swagger/                   # Documentação OpenAPI gerada
+│       └── envio_qualipoints/     # Exemplo: Transferência de QualiPoints
+│           ├── openapi.yaml       # Especificação OpenAPI 3.0.3
+│           └── README.md          # Documentação do endpoint
 │
 ├── LICENSE                         # Licença CC BY-NC-ND 4.0
 └── README.md                       # Este arquivo
 ```
+
+> **`Skill/`** contém heurísticas de **análise** — orientam o que investigar e quais perguntas fazer em cada fase do SDLC.
+> **`docs/`** contém guias de **implementação** — orientam como construir os artefatos resultantes (Swagger, testes).
 
 ---
 
@@ -92,11 +101,11 @@ heuristic-driven-SDLC/
 
 ### 1️⃣ Aplicar Heurísticas no Seu Projeto
 
-Cada heurística na pasta `skills/` é uma skill independente que pode ser aplicada em diferentes fases do SDLC:
+Cada heurística na pasta `Skill/` é uma skill independente que pode ser aplicada em diferentes fases do SDLC:
 
 ```bash
 # Exemplo: Aplicar a heurística User Scenarios
-# Leia o arquivo skills/Cap04_concepcao/UserScenarios.md
+# Leia o arquivo Skill/Cap04_concepcao/UserScenarios.md
 # E siga as instruções para gerar cenários de uso a partir dos seus requisitos
 ```
 
@@ -138,18 +147,18 @@ Para gerar documentação Swagger ao final das etapas de design e arquitetura:
 ```
 Eu tenho a análise da funcionalidade do sistema dividida por etapas:
 
-- Requisito final: @setUp/REQ_FINAL.MD 
-- Personas: @example/Cap04_concepcao/USER_SCENARIOS_REQ_INICIAL.md
-- Design do código: 
-  - @example/Cap05_design/DEPENDENCIES_REQ_FINAL.md
-  - @example/Cap05_design/MULTI_USER_REQ_FINAL.md
-  - @example/Cap05_design/STATE_ANALYSIS_REQ_FINAL.md
+- Requisito inicial: @input/REQ_INICIAL.MD
+- Personas: @example-book/cap-04-concepcao/USER_SCENARIOS_REQ_INICIAL.md
+- Design do código:
+  - @example-book/cap-05-design/DEPENDENCIES_REQ_INICIAL_V2.md
+  - @example-book/cap-05-design/MULTI_USER_REQ_INICIAL_V2.md
+  - @example-book/cap-05-design/STATE_ANALYSIS_REQ_INICIAL_V2.md
 - Arquitetura do código:
-  - @example/Cap06_arquitetura/COUNT_REQ_FINAL.md
-  - @example/Cap06_arquitetura/CRUD_REQ_FINAL.md
+  - @example-book/cap-06-arquitetura/COUNT_REQ_INICIAL_V2.md
+  - @example-book/cap-06-arquitetura/CRUD_REQ_INICIAL_V2.md
 
-Qual seria a melhor forma de passar informações para construir o swagger 
-da aplicação utilizando a skill @skills/utils/SWAGGER_API_DOC.md?
+Qual seria a melhor forma de passar informações para construir o swagger
+da aplicação utilizando a skill @docs/builSwagger/SWAGGER_API_DOC.md?
 ```
 
 O LLM irá gerar um plano com a melhor estratégia para criar o Swagger como documentação que irá auxiliar:
@@ -161,19 +170,19 @@ O LLM irá gerar um plano com a melhor estratégia para criar o Swagger como doc
 
 O repositório inclui um exemplo completo de aplicação das heurísticas:
 
-- **Requisito Base**: `setUp/REQ_FINAL.MD`
-- **Análises por Heurística**: Arquivos em `example/Cap04_*` até `example/Cap09_*`
-- **Swagger Final**: `swagger/envio_qualipoints/openapi.yaml`
+- **Requisito Base**: `input/REQ_INICIAL.MD`
+- **Análises por Heurística**: Arquivos em `example-book/cap-04-*` até `example-book/cap-07-*`
+- **Swagger Final**: `output/swagger/envio_qualipoints/openapi.yaml`
 
 Para visualizar o Swagger gerado:
 
 ```bash
 # Opção 1: Swagger Editor Online
 # Acesse https://editor.swagger.io/
-# Use File → Import file e selecione swagger/envio_qualipoints/openapi.yaml
+# Use File → Import file e selecione output/swagger/envio_qualipoints/openapi.yaml
 
 # Opção 2: Swagger UI via Docker
-cd swagger/envio_qualipoints
+cd output/swagger/envio_qualipoints
 docker run -p 8080:8080 \
   -e SWAGGER_JSON=/openapi.yaml \
   -v $(pwd)/openapi.yaml:/openapi.yaml \
