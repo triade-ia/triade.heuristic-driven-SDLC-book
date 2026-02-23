@@ -58,10 +58,14 @@ heuristic-driven-SDLC/
 │   │   ├── VADER.md               # Validação, Asserção, Dados, Exceções, Resultados
 │   │   └── FAILURE.md             # Cenários de falha
 │   │
-│   └── Cap09_teste/               # Heurísticas de Teste
-│       ├── EMOTIONS.md            # Testes emocionais/comportamentais
-│       ├── FAILURE.md             # Testes de falha
-│       └── FLOOD.md               # Testes de carga e limites
+│   ├── Cap09_teste/               # Heurísticas de Teste
+│   │   ├── EMOTIONS.md            # Testes emocionais/comportamentais
+│   │   ├── FAILURE.md             # Testes de falha
+│   │   └── FLOOD.md               # Testes de carga e limites
+│   │
+│   └── Cap10_pos-deploy/          # Heurísticas de Pós-Deploy
+│       ├── SFDPOT.md              # Sources, Formats, Dependencies, Pace, Environment, Other, Time
+│       └── RCRCRC.md              # Recent, Core, Risky, Configuration-sensitive, Conformance, Complex
 │
 ├── docs/                           # Documentação de suporte
 │   ├── builSwagger/
@@ -78,7 +82,8 @@ heuristic-driven-SDLC/
 │   ├── cap-04-concepcao/          # Outputs da fase de concepção
 │   ├── cap-05-design/             # Outputs da fase de design
 │   ├── cap-06-arquitetura/        # Outputs da fase de arquitetura
-│   └── cap-07-refinamento/        # Outputs da fase de refinamento
+│   ├── cap-07-refinamento/        # Outputs da fase de refinamento
+│   └── cap-10-pos-deploy/         # Outputs da fase de pós-deploy
 │
 ├── output/                         # Artefatos gerados
 │   ├── requisito-revisado/        # Requisito revisado após aplicação das heurísticas
@@ -139,6 +144,7 @@ Para aplicar o método completo em um projeto:
 4. **Refinamento (Cap07)**: Aplique `Chique`, `InputMethod` e `SeenAndHeard`
 5. **Desenvolvimento (Cap08)**: Use `Baica`, `VADER` e `FAILURE` durante implementação
 6. **Testes (Cap09)**: Crie testes baseados em `EMOTIONS`, `FAILURE` e `FLOOD`
+7. **Pós-Deploy (Cap10)**: Monitore com `SFDPOT` e priorize regressão com `RCRCRC`
 
 ### 3️⃣ Gerar Documentação OpenAPI/Swagger
 
@@ -203,7 +209,8 @@ graph TD
     E --> F[Gerar Swagger]
     F --> G[Cap08: Desenvolvimento]
     G --> H[Cap09: Testes]
-    H --> I[Produto Finalizado]
+    H --> I[Cap10: Pós-Deploy]
+    I --> J[Produto em Produção]
 ```
 
 ---
@@ -229,6 +236,8 @@ graph TD
 | **FAILURE** | Testar cenários de falha | Análise F.A.I.L.U.R.E (7 dimensões de falha) |
 | **EMOTIONS** | Avaliar impacto emocional da UX | Análise das 9 emoções do usuário |
 | **FLOOD** | Testar resiliência sob alta carga | Análise de picos, concorrência e volume massivo |
+| **SFDPOT** | Exploração e análise de risco em produção | Análise de Sources, Formats, Dependencies, Pace, Environment, Other, Time |
+| **RCRCRC** | Priorizar testes de regressão pós-deploy | Análise de Recent, Core, Risky, Configuration-sensitive, Conformance, Complex |
 
 ---
 

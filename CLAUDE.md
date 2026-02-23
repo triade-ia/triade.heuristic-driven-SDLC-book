@@ -27,6 +27,7 @@ Contém skills de heurística organizadas por etapa do SDLC, exemplos de aplica�
 4. **Cap07 — Refinamento:** `Skill/Cap07_refinamento/Chique.md` → `Skill/Cap07_refinamento/InputMethod.md` → `Skill/Cap07_refinamento/SeenAndHeard.md`
 5. **Cap08 — Desenvolvimento:** `Skill/Cap08_desenvolvimento/Baica.md` → `Skill/Cap08_desenvolvimento/VADER.md` → `Skill/Cap08_desenvolvimento/FAILURE.md`
 6. **Cap09 — Testes:** `Skill/Cap09_teste/EMOTIONS.md` → `Skill/Cap09_teste/FAILURE.md` → `Skill/Cap09_teste/FLOOD.md`
+7. **Cap10 — Pós-Deploy:** `Skill/Cap10_pos-deploy/SFDPOT.md` → `Skill/Cap10_pos-deploy/RCRCRC.md`
 
 ### Geração de Documentação
 
