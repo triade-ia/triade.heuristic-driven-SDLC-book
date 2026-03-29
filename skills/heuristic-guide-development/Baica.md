@@ -1,13 +1,13 @@
 ---
 name: baica-heuristic
-description: Analisa e assegura o core essencial e resiliente do código em relação a qualquer entrada de dados, focando em boundaries, nulls/vazios, caracteres especiais, formatos inválidos e padrões comuns de falha. Use quando analisando requisitos, codificando validações, criando testes ou quando o usuário solicita aplicação da heurística Baica. Aceita como contexto: épico, épico + tarefa (story ou tarefa), repositório, função específica ou combinação de todos.
+description: Aplica a heurística BAICA (Básico, Automação, Interrupção, Criação de Novos Dados, Anônimo) para garantir testes fundamentais em funcionalidades. Use quando analisando requisitos, codificando, criando testes ou quando o usuário solicita aplicação da heurística BAICA. Aceita como contexto: épico, épico + tarefa (story ou tarefa), repositório, função específica ou combinação de todos.
 ---
 
-# Heurística Baica
+# Heurística BAICA
 
-Identificando e Assegurando o Core Essencial e Resiliente do Código
+Garantindo Testes Fundamentais em Funcionalidades
 
-A heurística Baica, criada por Jonatas Faria, direciona o foco para a robustez e o comportamento fundamental do código em relação a qualquer entrada de dados [1]. Ela força a análise dos cenários de boundaries (limites) para entender como o código reage aos extremos e aos valores padrão mais propensos a quebrar ou revelar vulnerabilidades. Não se trata apenas de testar o "caminho feliz", mas de investigar os alicerces da manipulação de dados na implementação do sistema.
+A heurística BAICA, criada por Jonatas Martins Faria, é uma abordagem estruturada para garantir que os testes fundamentais sejam aplicados consistentemente durante o desenvolvimento de novas funcionalidades [1]. Esta metodologia prioriza aspectos essenciais frequentemente negligenciados que podem gerar problemas significativos em ambientes de produção.
 
 ## Contextos de Entrada
 
@@ -15,183 +15,197 @@ Informe o contexto da análise. A heurística se adapta ao nível de detalhe dis
 
 | Modo | O que fornecer | Foco da análise |
 |------|---------------|-----------------|
-| **Épico** | ID/título do épico na ferramenta de gestão | Identificação de entradas de dados macro; gaps de validação nos requisitos do épico |
-| **Épico + Tarefa** | ID do épico + ID/título da story ou tarefa | Análise Baica sobre as entradas de dados especificadas na tarefa |
-| **Repositório** | URL ou nome do repositório + branch | Análise do código existente: pontos de entrada, validações implementadas |
-| **Função Específica** | Trecho de código ou nome da função + arquivo | Análise cirúrgica das 5 dimensões Baica no ponto de implementação |
-| **Combinado** | Qualquer combinação dos anteriores | Análise completa: requisito → código → gaps → testes |
+| **Épico** | ID/título do épico na ferramenta de gestão | Identificação macro dos cinco pilares BAICA nos requisitos do épico |
+| **Épico + Tarefa** | ID do épico + ID/título da story ou tarefa | Análise BAICA sobre a funcionalidade especificada na tarefa |
+| **Repositório** | URL ou nome do repositório + branch | Análise do código existente: testabilidade, robustez, fluxos |
+| **Função Específica** | Trecho de código ou nome da função + arquivo | Análise cirúrgica dos 5 pilares BAICA no ponto de implementação |
+| **Combinado** | Qualquer combinação dos anteriores | Análise completa: requisito -> código -> gaps -> testes |
 
 ## Atuação
 
-Você é um especialista em qualidade de software focado em validação rigorosa de inputs e prevenção de vulnerabilidades. Sua tarefa é aplicar a heurística Baica sobre o contexto fornecido: receba um **input** (épico, épico + tarefa, repositório, função específica ou combinação) e uma **solicitação** (análise de requisitos, revisão de codificação ou elaboração de testes) e realize a análise baseada nos princípios Baica, identificando gaps de validação, riscos de borda e oportunidades de blindagem do sistema.
+Você é um especialista em qualidade de software focado em garantir cobertura essencial de testes. Sua tarefa é aplicar a heurística BAICA sobre o contexto fornecido: receba um **input** (épico, épico + tarefa, repositório, função específica ou combinação) e uma **solicitação** (análise de requisitos, revisão de codificação ou elaboração de testes) e realize a análise baseada nos cinco pilares BAICA, identificando gaps de cobertura, riscos de robustez e oportunidades de melhoria na testabilidade do sistema.
 
 ## Pré-processamento do Contexto
 
 Antes de iniciar a análise, identifique o modo de entrada e ajuste a profundidade:
 
-### Épico apenas → Análise de Requisitos
-- Leia o épico e identifique todas as entradas de dados envolvidas
-- Para cada entrada, verifique se o épico define: boundaries, tratamento de null/vazio, caracteres permitidos, formatos e políticas de segurança
-- Saída: lista de gaps de validação e perguntas de refinamento para as tasks filhas
+### Épico apenas -> Análise de Requisitos
+- Leia o épico e identifique as funcionalidades e fluxos envolvidos
+- Para cada funcionalidade, verifique se o épico define: fluxos básicos (happy path), critérios de testabilidade, cenários de interrupção, fluxos de criação de dados e comportamento em modo anônimo
+- Saída: lista de gaps de cobertura e perguntas de refinamento para as tasks filhas
 
-### Épico + Tarefa → Análise de Requisitos
-- Use o épico para contexto de negócio; use a tarefa para entradas específicas
-- Aplique as 5 dimensões Baica sobre os campos e regras definidos na tarefa
-- Saída: análise completa com gaps no requisito, regras de validação sugeridas e mensagens de erro recomendadas
+### Épico + Tarefa -> Análise de Requisitos
+- Use o épico para contexto de negócio; use a tarefa para funcionalidades específicas
+- Aplique os 5 pilares BAICA sobre os fluxos e regras definidos na tarefa
+- Saída: análise completa com gaps de cobertura, cenários de teste sugeridos e recomendações
 
-### Repositório → Codificação
-- Inspecione os pontos de entrada do repositório (controllers, handlers, forms)
-- Para cada ponto de entrada encontrado, aplique as 5 dimensões Baica
-- Saída: análise do código real com gaps de validação identificados e recomendações de blindagem
+### Repositório -> Codificação
+- Inspecione os pontos de entrada do repositório (controllers, handlers, forms, componentes de UI)
+- Para cada ponto de entrada encontrado, aplique os 5 pilares BAICA
+- Saída: análise do código real com gaps de testabilidade identificados e recomendações
 
-### Função Específica → Codificação
-- Foque na função/método fornecido e aplique as 5 dimensões de forma cirúrgica
-- Identifique exatamente qual dimensão está ausente ou incompleta
+### Função Específica -> Codificação
+- Foque na função/método fornecido e aplique os 5 pilares de forma cirúrgica
+- Identifique exatamente qual pilar está ausente ou incompleto
 - Saída: análise pontual com recomendações de implementação e casos de teste necessários
 
-### Combinado → Análise completa
+### Combinado -> Análise completa
 - Execute Análise de Requisitos (épico/tarefa) + Codificação (repositório/função) em sequência
-- Consolide em relatório único cobrindo: gaps de requisito → gaps de código → casos de teste por camada
+- Consolide em relatório único cobrindo: gaps de requisito -> gaps de código -> casos de teste por pilar
 
 ## Processo de Análise
 
-Ao receber um input e uma solicitação, analise sistematicamente as cinco dimensões abaixo. Adapte a profundidade conforme o contexto (requisitos, codificação ou teste).
+Ao receber um input e uma solicitação, analise sistematicamente os cinco pilares abaixo. Adapte a profundidade conforme o contexto (requisitos, codificação ou teste).
 
-### 1. Valores Mínimos/Máximos (Boundaries)
+### 1. Básico (B)
 
-**Como o código é construído para validar e reagir aos menores e maiores valores possíveis para uma entrada? Ele previne erros de estouro, subfluxo ou lógica?**
+**Realize as ações mais simples e fundamentais da funcionalidade.**
 
-Questione:
-- Quais são os limites mínimos e máximos definidos para cada entrada numérica ou de tamanho?
-- O código trata explicitamente idade = 0, idade = 150, quantidade = -1, quantidade = MAX_INT (ou equivalentes)?
-- Há validação de range antes de operações que podem causar overflow ou underflow?
-- Listas, buffers e strings têm limite de tamanho validado?
-- O comportamento nos limites está documentado nos requisitos e coberto por testes?
-
-**Áreas de análise:**
-- **Ranges numéricos**: Mínimo/máximo para inteiros, decimais, percentuais
-- **Tamanhos**: Comprimento de strings, tamanho de coleções, tamanho de payloads
-- **Estouro**: Overflow/underflow em cálculos, índices fora do range
-- **Valores sentinela**: Zero, negativo, máximo do tipo (MAX_INT, etc.)
-
-**Exemplos de análise:**
-- "Requisito não define valor máximo para quantidade" → Risco de overflow ou abuso
-- "Código não valida índice antes de acessar array" → Possível exceção ou comportamento indefinido
-- "Campo aceita quantidade negativa" → Lógica de negócio corrompida
-
-### 2. Valores Nulos/Vazios (Nulls/Empty)
-
-**Como o código lida com entradas que são nulas, vazias ou indefinidas? Ele impede erros de NullPointerException ou lógica corrompida?**
+**Objetivo:** Verificar se os fluxos principais funcionam corretamente antes de partir para cenários complexos. Funciona como um teste de smoke/sanidade, identificando problemas básicos rapidamente.
 
 Questione:
-- Todos os pontos de entrada tratam null, undefined, string vazia, array vazio e objeto vazio?
-- Há checagens defensivas antes de dereferenciar objetos ou acessar propriedades?
-- Requisitos especificam o que fazer quando um campo opcional não é enviado?
-- Coleções vazias são tratadas sem assumir "pelo menos um elemento"?
+- O caminho feliz (happy path) da funcionalidade está coberto?
+- As operações CRUD básicas (Create, Read, Update, Delete) funcionam corretamente?
+- As validações essenciais estão implementadas e funcionando?
+- As mensagens de sucesso e erro aparecem adequadamente?
+- Os fluxos principais estão documentados nos requisitos?
 
 **Áreas de análise:**
-- **Null safety**: Verificação antes de uso, valores default explícitos
-- **Strings vazias**: "" vs. null vs. apenas espaços em branco
-- **Coleções vazias**: [], {} — iteração e agregações
-- **Campos opcionais**: Presença vs. ausência em APIs e formulários
+- **Happy path**: Fluxo principal da funcionalidade com dados válidos
+- **CRUD**: Criação, leitura, atualização e exclusão de registros
+- **Validações essenciais**: Campos obrigatórios, tipos de dados, regras de negócio básicas
+- **Feedback ao usuário**: Mensagens de sucesso, erro e estados de carregamento
 
 **Exemplos de análise:**
-- "Método não verifica null antes de chamar .length()" → NullPointerException em produção
-- "Requisito não define comportamento quando lista de itens vem vazia" → Comportamento inconsistente
-- "Campo opcional tratado como obrigatório no código" → Falha com clientes que omitem o campo
+- "Formulário de cadastro: verificar se é possível cadastrar um usuário com dados válidos, visualizar na listagem, editar as informações e excluir o registro"
+- "Requisito não define o caminho feliz completo" -> Gap de especificação
+- "Mensagem de erro genérica para todos os cenários" -> Má experiência do usuário
 
-### 3. Caracteres Especiais (Special Chars)
+### 2. Automação (A)
 
-**Como o código sanitiza e valida inputs que contêm caracteres não alfanuméricos, símbolos ou emojis para prevenir problemas de codificação, segurança (injeção) ou validação?**
+**Verifique a testabilidade da funcionalidade para futura automação.**
+
+**Objetivo:** Garantir que os elementos da interface possam ser identificados de forma única e consistente para testes automatizados. Facilita a criação de testes automatizados futuros e reduz retrabalho.
 
 Questione:
-- Há sanitização de entrada para evitar injeção (SQL, comando, HTML/script)?
-- O sistema aceita ou rejeita emojis, caracteres Unicode e quebras de linha conforme o contexto?
-- Nomes, descrições e campos de texto têm política clara para caracteres especiais?
-- Codificação (UTF-8, etc.) é tratada de forma consistente em todas as camadas?
+- Botões, campos e dropdowns possuem identificadores únicos (ID, name, data-testid)?
+- Listas e tabelas têm elementos identificáveis individualmente?
+- Rótulos e mensagens podem ser localizados programaticamente?
+- Os estados da aplicação são verificáveis (loading, success, error)?
+- Os identificadores são estáveis entre deploys (não são gerados dinamicamente)?
 
 **Áreas de análise:**
-- **Sanitização**: Escape/parameterização para queries, escape para HTML/JS
-- **Whitelist vs. blacklist**: O que é permitido vs. o que é bloqueado
-- **Unicode e emojis**: Comportamento em campos de texto e em identificadores
-- **Delimitadores e controle**: Aspas, barras, null bytes, newlines
+- **Identificadores únicos**: IDs, names, data-testid em elementos interativos
+- **Estabilidade**: Seletores que não mudam entre builds ou deploys
+- **Estados verificáveis**: Atributos ou classes que indicam estado da UI
+- **Acessibilidade**: ARIA labels e roles que facilitam localização
 
 **Exemplos de análise:**
-- "Consulta montada com concatenação de string" → Risco de SQL injection
-- "Input com <script> é armazenado e exibido sem escape" → Risco de XSS
-- "Campo nome rejeita acentos sem justificativa" → Má experiência e dados truncados
+- "Botão de submit sem ID ou data-testid" -> Difícil de automatizar
+- "Tabela com linhas sem identificadores únicos" -> Impossível selecionar registro específico
+- "IDs gerados dinamicamente (ex: btn_abc123)" -> Seletores quebram entre sessões
 
-### 4. Formatos Inválidos (Invalid Formats)
+### 3. Interrupção (I)
 
-**Se o código espera um e-mail, como ele valida o formato? Se espera uma data, como ele rejeita formatos incorretos?**
+**Teste o comportamento da aplicação quando processos são interrompidos.**
+
+**Objetivo:** Verificar a robustez da aplicação quando operações são canceladas ou falham. Identifica problemas de integridade de dados e melhora a experiência do usuário em cenários reais.
 
 Questione:
-- Cada campo com formato definido (e-mail, data, telefone, CPF, URL) tem validação explícita?
-- Mensagens de erro informam o formato esperado?
-- Requisitos especificam os formatos aceitos e a política para rejeição (mensagem, código de erro)?
-- Datas e números têm tratamento de timezone e locale quando relevante?
+- O que acontece quando um upload de arquivo é interrompido no meio do processo?
+- O que acontece quando uma operação de salvamento é cancelada?
+- O sistema mantém consistência se o navegador é fechado durante uma transação?
+- Há tratamento adequado para timeouts de rede?
+- A navegação durante carregamentos causa problemas?
 
 **Áreas de análise:**
-- **E-mail, URL, telefone**: Regex ou biblioteca de validação, consistência cliente/servidor
-- **Datas e horas**: Formato (ISO, locale), timezone, valores impossíveis (31/02)
-- **Identificadores**: CPF, CNPJ, IDs — algoritmo de validação quando aplicável
-- **Feedback**: Mensagem clara sobre o formato esperado em caso de erro
+- **Upload interrompido**: Cancelamento durante envio de arquivos
+- **Operações canceladas**: Cancelamento de salvamento, edição ou exclusão
+- **Fechamento de sessão**: Fechar navegador/aba durante transação
+- **Timeout de rede**: Simulação de perda de conexão ou lentidão
+- **Navegação durante carregamento**: Trocar de página antes de operação completar
 
 **Exemplos de análise:**
-- "Campo e-mail aceita 'abc' sem rejeitar" → Dados inválidos persistidos
-- "Data em formato inválido retorna 500" → Falha genérica em vez de 400 com mensagem clara
-- "Requisito não especifica formato de data (DD/MM vs MM/DD)" → Ambiguidade e bugs entre regiões
+- "Upload interrompido deixa arquivo corrompido no servidor" -> Integridade comprometida
+- "Fechar aba durante pagamento não cancela a transação" -> Risco financeiro
+- "Perda de conexão durante salvamento não exibe mensagem de erro" -> Dados podem ser perdidos silenciosamente
 
-### 5. Padrões Comuns de Falha (Common Failure Patterns)
+### 4. Criação de Novos Dados (C)
 
-**Como o código se protege ativamente contra vulnerabilidades conhecidas (ex: SQL injection, XSS) que podem ser exploradas através de inputs maliciosos?**
+**Execute o fluxo completo criando todos os dados necessários do zero.**
+
+**Objetivo:** Testar dependências entre funcionalidades e validar o fluxo end-to-end sem dados pré-existentes. Expõe problemas de dependência e garante que o fluxo completo funciona para novos usuários.
 
 Questione:
-- Há proteção contra SQL injection (queries parametrizadas ou ORM)?
-- Saída para o usuário é escapada para evitar XSS?
-- Há validação de CSRF em formulários e APIs sensíveis?
-- Path traversal e upload de arquivos perigosos são prevenidos?
-- Autenticação e autorização são verificadas em todos os pontos sensíveis, independentemente do input?
+- O fluxo funciona a partir de um ambiente limpo (sem dados pré-cadastrados)?
+- Todos os dados de dependência necessários podem ser criados pelo usuário?
+- O fluxo completo até a funcionalidade alvo funciona em sequência?
+- Há dependências ocultas de dados pré-existentes (seeds, fixtures)?
+- Um novo usuário consegue completar o fluxo sem ajuda?
 
 **Áreas de análise:**
-- **Injection**: SQL, NoSQL, comando, LDAP, template
-- **XSS**: Armazenado, refletido, DOM — escape e Content-Security-Policy
-- **CSRF**: Tokens, SameSite, origem
-- **Path traversal e uploads**: Extensão, conteúdo, diretório de destino
-- **Authn/Authz**: Verificação em toda ação sensível, não confiar em input do cliente para permissões
+- **Ambiente limpo**: Funcionalidade opera sem dados pré-cadastrados
+- **Cadeia de dependências**: Criação sequencial de todos os dados necessários
+- **Fluxo end-to-end**: Do primeiro cadastro até a funcionalidade alvo
+- **Onboarding**: Experiência de um usuário completamente novo
 
 **Exemplos de análise:**
-- "API confia em role enviado no body" → Escalação de privilégios
-- "Upload aceita .exe renomeado" → Risco de malware
-- "Sem CSRF token em formulário de transferência" → Ação indesejada por site terceiro
+- "Relatório de vendas: criar usuário -> produto -> cliente -> pedido -> venda -> relatório, tudo do zero"
+- "Funcionalidade depende de dados seed que não existem em ambiente novo" -> Falha no primeiro uso
+- "Tela de dashboard assume pelo menos um registro existente" -> Erro para novos usuários
+
+### 5. Anônimo (A)
+
+**Valide o comportamento da aplicação em navegação privada/anônima.**
+
+**Objetivo:** Garantir que a aplicação funcione corretamente quando cookies, cache e storage local não estão disponíveis. Simula o comportamento de usuários conscientes de privacidade e identifica dependências não documentadas de armazenamento local.
+
+Questione:
+- A aplicação funciona corretamente em modo anônimo/privado do navegador?
+- Funcionalidades dependentes de cookies funcionam adequadamente?
+- Login e logout funcionam em modo privado?
+- Dados sensíveis ficam expostos após fechar a sessão anônima?
+- A aplicação quebra sem cache ou storage local?
+
+**Áreas de análise:**
+- **Modo privado**: Todas as funcionalidades principais em navegação anônima
+- **Cookies e storage**: Dependência de cookies, localStorage, sessionStorage
+- **Autenticação**: Login/logout sem cookies persistentes
+- **Dados sensíveis**: Exposição de dados após encerramento de sessão
+- **Cache**: Comportamento sem cache do navegador
+
+**Exemplos de análise:**
+- "Aplicação redireciona infinitamente em modo anônimo" -> Dependência não documentada de cookie
+- "Token de sessão não é limpo ao fechar aba anônima" -> Risco de segurança
+- "Funcionalidade de 'lembrar-me' não é ignorada em modo privado" -> Comportamento inconsistente
 
 ## Aplicação em Três Contextos
 
 ### Análise de Requisitos
 
-Ao analisar requisitos com Baica:
-- Para cada entrada de dados, verifique se os requisitos definem: boundaries (mín/máx), tratamento de null/vazio, caracteres permitidos, formato esperado e políticas de segurança.
-- Liste **gaps de validação**: cenários de borda ou formatos inválidos não especificados.
-- Sugira regras de validação e mensagens de erro a serem documentadas.
+Ao analisar requisitos com BAICA:
+- Para cada funcionalidade, verifique se os requisitos definem: fluxos básicos (happy path e CRUD), critérios de testabilidade para automação, cenários de interrupção, fluxos de criação de dados do zero e comportamento em modo anônimo.
+- Liste **gaps de cobertura**: cenários não especificados em cada pilar.
+- Sugira cenários de teste e critérios de aceitação a serem documentados.
 
 ### Codificação
 
 Ao revisar ou guiar a implementação:
-- Garanta que cada ponto de entrada aplique as cinco dimensões (boundaries, null/empty, special chars, formatos, failure patterns).
-- Priorize validação no ponto de entrada e mensagens claras para o usuário ou cliente da API.
-- Documente decisões (ex.: "campo X rejeita emojis por limite de tamanho no legado").
+- Garanta que cada funcionalidade atenda os cinco pilares (básico, automação, interrupção, criação de dados, anônimo).
+- Priorize identificadores únicos para elementos de UI, tratamento de interrupções e independência de dados pré-existentes.
+- Documente decisões (ex.: "componente X requer data-testid para automação").
 
 ### Teste
 
-Ao elaborar casos de teste com Baica:
-- Inclua testes para: valores nos limites (0, máximo, -1 quando aplicável), null/vazio, strings com caracteres especiais e emojis, formatos inválidos (e-mail, data), e payloads que simulam padrões de falha (injection, XSS).
-- Para cada dimensão, tenha pelo menos um caso "válido no limite" e um "inválido" com resposta esperada clara.
+Ao elaborar casos de teste com BAICA:
+- Inclua testes para: fluxos básicos (happy path, CRUD, validações), testabilidade para automação (identificadores, seletores), cenários de interrupção (cancelamento, timeout, fechamento), criação de dados do zero (fluxo end-to-end limpo) e modo anônimo (sem cookies/cache).
+- Para cada pilar, tenha pelo menos um caso de teste com resultado esperado claro.
 
-#### Implementação de Testes Baica por Camada
+#### Implementação de Testes BAICA por Camada
 
-Para decidir QUAIS testes implementar aplicando Baica:
+Para decidir QUAIS testes implementar aplicando BAICA:
 
-1. **Consulte [TEST_STRATEGY.md](../../utils/testes/TEST_STRATEGY.md)** com seu requisito e/ou código. A skill analisa, identifica aplicação de Baica e gera relatório em `output/test-strategy-*.md` com casos de teste por camada.
+1. **Consulte [TEST_STRATEGY.md](../../utils/testes/TEST_STRATEGY.md)** com seu requisito e/ou código. A skill analisa, identifica aplicação de BAICA e gera relatório em `output/test-strategy-*.md` com casos de teste por camada.
 2. **Para implementar**, use o relatório como contexto com os guides:
    - [TEST_UNIT_GUIDE.md](../../utils/testes/TEST_UNIT_GUIDE.md) — Testes unitários
    - [TEST_INTEGRATION_GUIDE.md](../../utils/testes/TEST_INTEGRATION_GUIDE.md) — Testes de integração
@@ -199,79 +213,75 @@ Para decidir QUAIS testes implementar aplicando Baica:
    - [TEST_COMPONENT_GUIDE.md](../../utils/testes/TEST_COMPONENT_GUIDE.md) — Testes de componentes
    - [TEST_E2E_GUIDE.md](../../utils/testes/TEST_E2E_GUIDE.md) — Testes E2E
 
+## Quando Aplicar BAICA
+
+- **Desenvolvimento de novas funcionalidades**: Garantir cobertura desde o início
+- **Integração de funcionalidades existentes**: Validar que integrações não quebraram fluxos
+- **Testes de regressão após mudanças**: Verificar que os cinco pilares continuam atendidos
+- **Validação antes de releases**: Checagem final de cobertura essencial
+- **Onboarding de novos testadores**: Guia estruturado para cobertura mínima
+
+## Exemplo de Aplicação Completa
+
+**Cenário:** Testando uma nova funcionalidade de upload de documentos
+
+**B - Básico:**
+- Upload de um arquivo válido
+- Visualização do arquivo na lista
+- Download do arquivo
+- Exclusão do arquivo
+
+**A - Automação:**
+- Verificar IDs únicos em botões de upload, lista e ações
+- Confirmar que mensagens de status são identificáveis
+- Validar que progress bars têm atributos testáveis
+
+**I - Interrupção:**
+- Cancelar upload no meio do processo
+- Fechar navegador durante upload
+- Simular perda de conexão
+
+**C - Criação de Novos Dados:**
+- Começar com usuário novo
+- Criar pasta de documentos
+- Fazer upload do primeiro documento
+- Testar todo o fluxo sem dados pré-existentes
+
+**A - Anônimo:**
+- Executar todo o fluxo em modo privado
+- Verificar se funciona sem cookies persistentes
+- Confirmar que não há vazamento de dados entre sessões
+
 ## Análise de Impacto em Escala
 
-- **Prevenção de falhas em larga escala**: Um único input malformado pode corromper dados ou derrubar serviços; validação rigorosa evita cascata de falhas.
-- **Redução de débito técnico**: Bugs de borda em produção são caros de depurar; tratá-los na base do código reduz custo de manutenção.
-- **Segurança em camadas**: Validação de input é a primeira linha de defesa contra ataques automatizados; sistemas escaláveis são alvos maiores.
-- **Comportamento previsível**: Respostas controladas a inputs anômalos evitam consumo excessivo de recursos e facilitam evolução do produto.
+- **Cobertura essencial**: Garante que aspectos fundamentais não sejam esquecidos em nenhuma funcionalidade.
+- **Detecção precoce**: Identifica problemas básicos antes que cheguem ao cliente.
+- **Preparação para automação**: Facilita futuras iniciativas de automação desde o design.
+- **Robustez**: Testa cenários reais de uso e interrupção que ocorrem em produção.
+- **Experiência do usuário**: Simula comportamentos reais de usuários, incluindo navegação privada e primeiro uso.
 
-## Implementando Testes Baseados em Baica
-
-A heurística Baica é especialmente poderosa quando traduzida em testes automatizados. Para implementar testes que cobrem as cinco dimensões:
-
-1. **Identifique as entradas de dados** no código ou API
-2. **Para cada entrada, crie testes nas camadas apropriadas:**
-   - Unitários: funções de validação isoladas
-   - Integração: fluxo de dados entre módulos
-   - Serviço: endpoints de API
-   - E2E: interface do usuário
-
-3. Use o **relatório** gerado por TEST_STRATEGY como contexto ao chamar os guides acima para obter código em TypeScript e Java.
-
-### Exemplo de Cobertura Baica em Testes
-
-Para uma função de validação de amount, os testes devem cobrir:
-
-**Boundaries:**
-- amount = 0 (rejeitar)
-- amount = -1 (rejeitar)
-- amount = 1 (aceitar - mínimo válido)
-- amount = 1000000 (aceitar - máximo válido)
-- amount = 1000001 (rejeitar - acima do máximo)
-
-**Nulls/Empty:**
-- amount = null (rejeitar)
-- amount = undefined (rejeitar)
-
-**Special Chars (quando aplicável a strings):**
-- Caracteres Unicode
-- Emojis
-- Scripts maliciosos
-
-**Invalid Formats:**
-- Tipos incorretos (string quando esperado number)
-- Formatos inválidos para campos específicos (email, data, CPF)
-
-**Failure Patterns:**
-- Inputs que podem causar SQL injection
-- Inputs que podem causar XSS
-- Payloads muito grandes (DoS)
-
-Consulte TEST_STRATEGY (com requisito/código) para gerar o relatório e, em seguida, os guides em [utils/testes/](../../utils/testes/) para exemplos em TypeScript e Java.
-
-## Checklist de Análise Baica
+## Checklist de Análise BAICA
 
 Ao aplicar a heurística, verifique:
 
-- [ ] **Boundaries**: Limites mín/máx definidos e validados; tratamento de zero, negativo e máximo do tipo
-- [ ] **Nulls/Empty**: Tratamento explícito de null, vazio e opcionais; sem dereferenciação sem checagem
-- [ ] **Special Chars**: Sanitização/escape para evitar injection e XSS; política clara para Unicode/emojis
-- [ ] **Formatos**: Validação de e-mail, data, telefone, etc.; mensagem de erro com formato esperado
-- [ ] **Common Failure Patterns**: Proteção contra SQL injection, XSS, CSRF; validação de path e upload; auth não baseada em input do cliente
-- [ ] **Requisitos**: Gaps de validação documentados e regras de negócio para bordas definidas
-- [ ] **Testes**: Casos para limites, null/vazio, caracteres especiais, formatos inválidos e padrões de falha
+- [ ] **Básico**: Happy path coberto; CRUD funcional; validações essenciais implementadas; mensagens de sucesso/erro adequadas
+- [ ] **Automação**: Elementos com identificadores únicos e estáveis; estados verificáveis; seletores que não quebram entre deploys
+- [ ] **Interrupção**: Uploads, salvamentos e transações tratam cancelamento/timeout; integridade de dados mantida após interrupção
+- [ ] **Criação de Novos Dados**: Fluxo funciona do zero sem dados pré-existentes; dependências podem ser criadas pelo usuário; novo usuário consegue completar o fluxo
+- [ ] **Anônimo**: Funcionalidades operam em modo privado; sem dependência não documentada de cookies/cache; dados sensíveis não vazam entre sessões
+- [ ] **Requisitos**: Gaps de cobertura documentados para cada pilar
+- [ ] **Testes**: Casos de teste para cada um dos cinco pilares BAICA
 
 ## Objetivo Final
 
-Garantir que a base do código seja **sólida, segura e previsível** em relação a qualquer entrada. A análise deve identificar:
+Garantir que a funcionalidade tenha **cobertura essencial, robusta e testável** em todos os aspectos fundamentais. A análise deve identificar:
 
-1. **Gaps de validação**: Cenários de borda ou formatos não tratados nos requisitos ou no código
-2. **Riscos de segurança**: Pontos onde inputs maliciosos podem explorar vulnerabilidades conhecidas
-3. **Comportamento indefinido**: Situações em que null, vazio ou formato inválido não têm tratamento explícito
-4. **Oportunidades de blindagem**: Melhorias que tornam o sistema resiliente a inputs extremos ou malformados
-5. **Cobertura de teste**: Casos de teste necessários para cobrir as cinco dimensões da heurística Baica
+1. **Gaps de cobertura básica**: Fluxos principais (happy path, CRUD) não testados ou não especificados
+2. **Problemas de testabilidade**: Elementos sem identificadores, estados não verificáveis, seletores instáveis
+3. **Riscos de robustez**: Cenários de interrupção não tratados que podem corromper dados ou causar falhas
+4. **Dependências ocultas**: Funcionalidades que assumem dados pré-existentes e falham para novos usuários
+5. **Gaps de privacidade**: Comportamentos que quebram em modo anônimo ou dependem de armazenamento local
 
-Ao dominar a heurística Baica, você assegura que o sistema proteja seus alicerces contra falhas comuns e multiplicadas em escala, construindo uma fundação segura, estável e previsível desde a concepção do código.
+Ao dominar a heurística BAICA, você assegura que toda funcionalidade tenha uma base sólida de testes, cobrindo desde o caminho feliz até cenários reais de uso que frequentemente são negligenciados mas causam impacto significativo em produção.
 
-**[1]** Faria, Jonatas. Heurística Baica — Identificando e assegurando o core essencial e resiliente do código.
+**[1]** Faria, Jonatas Martins. Heurística BAICA — Garantindo testes fundamentais em funcionalidades.
