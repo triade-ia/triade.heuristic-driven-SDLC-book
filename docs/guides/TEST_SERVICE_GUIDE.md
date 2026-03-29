@@ -157,5 +157,5 @@ Template de caso de API no relatório: ID, endpoint, método, headers, body, sta
 - Estratégia: [TEST_STRATEGY.md](TEST_STRATEGY.md)
 - Unitários: [TEST_UNIT_GUIDE.md](TEST_UNIT_GUIDE.md)
 - Integração: [TEST_INTEGRATION_GUIDE.md](TEST_INTEGRATION_GUIDE.md)
-- VADER: [../../Cap08_desenvolvimento/VADER.md](../../Cap08_desenvolvimento/VADER.md)
-- FAILURE: [../../Cap08_desenvolvimento/FAILURE.md](../../Cap08_desenvolvimento/FAILURE.md)
+- VADER: [VADER.md](../../skills/heuristic-guide-development/VADER.md)
+- FAILURE: [FAILURE.md](../../skills/heuristic-guide-qa-test/FAILURE.md)

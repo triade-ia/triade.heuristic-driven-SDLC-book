@@ -38,7 +38,7 @@ Exemplo (apagar depois):
 
 - Título: iniciar com **Validar**.
 - Seções padrão: **Pré-condições**, **Step by step**, **Resultado esperado**.
-- Usar Markdown ou identação clara para facilitar leitura em documentos, planilhas ou ClickUp.
+- Usar Markdown ou identação clara para facilitar leitura em documentos, planilhas ou ferramenta de gestão.
 
 ### 2. Escrita do step by step
 

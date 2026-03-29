@@ -142,5 +142,3 @@ Casos de componente no relatório: renderização, estados (vazio, loading, erro
 - Estratégia: [TEST_STRATEGY.md](TEST_STRATEGY.md)
 - Unitários: [TEST_UNIT_GUIDE.md](TEST_UNIT_GUIDE.md)
 - E2E: [TEST_E2E_GUIDE.md](TEST_E2E_GUIDE.md)
-- Chique: [../../Cap07_refinamento/Chique.md](../../Cap07_refinamento/Chique.md)
-- SeenAndHeard: [../../Cap07_refinamento/SeenAndHeard.md](../../Cap07_refinamento/SeenAndHeard.md)

@@ -214,4 +214,4 @@ Use o relatório para casos de teste de integração: ID, componentes testados, 
 - Estratégia: [TEST_STRATEGY.md](TEST_STRATEGY.md)
 - Unitários: [TEST_UNIT_GUIDE.md](TEST_UNIT_GUIDE.md)
 - Serviço: [TEST_SERVICE_GUIDE.md](TEST_SERVICE_GUIDE.md)
-- Heurística CRUD: [../../Cap06_arquitetura/CRUD.md](../../Cap06_arquitetura/CRUD.md)
+- Heurística CRUD: [CRUD.md](../../skills/heuristic-guide-architeture-code/CRUD.md)

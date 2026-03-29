@@ -220,4 +220,4 @@ Use o relatório para desenhar casos de teste manuais ou automatizados. Cada UT-
 - Estratégia e relatório: [TEST_STRATEGY.md](TEST_STRATEGY.md)
 - Integração: [TEST_INTEGRATION_GUIDE.md](TEST_INTEGRATION_GUIDE.md)
 - Serviço/API: [TEST_SERVICE_GUIDE.md](TEST_SERVICE_GUIDE.md)
-- Heurística Baica: [../../Cap08_desenvolvimento/Baica.md](../../Cap08_desenvolvimento/Baica.md)
+- Heurística Baica: [Baica.md](../../skills/heuristic-guide-development/Baica.md)
